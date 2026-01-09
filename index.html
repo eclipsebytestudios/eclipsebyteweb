@@ -4,113 +4,43 @@
   <meta charset="UTF-8">
   <title>EclipseByte Studios</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<!-- NAVBAR -->
-<header class="navbar">
-  <div class="nav-left">
-    <img src="https://i.ibb.co/hFcgn43s/image-removebg-preview.png" class="logo">
-    <span class="brand">EclipseByte</span>
-  </div>
+  <header>
+    <img src="https://i.imgur.com/2yAfK3E.png" alt="EclipseByte Logo">
+    <h1>EclipseByte Studios</h1>
+    <p>Desenvolvimento • Jogos • Sistemas</p>
+  </header>
 
-  <nav class="nav-links">
-    <a onclick="showTab('home')">Home</a>
-    <a onclick="showTab('studio')">Studio</a>
-    <a onclick="showTab('xploits')">EclipseXPloits</a>
-    <a onclick="showTab('links')">Links</a>
-    <a onclick="showTab('contact')">Contato</a>
-  </nav>
+  <section>
+    <h2>Sobre nós</h2>
+    <p>
+      A EclipseByte Studios é focada em criar experiências únicas,
+      sistemas inteligentes e projetos de alto nível.
+    </p>
+  </section>
 
-  <div class="nav-actions">
-    <button onclick="toggleNotifications()">🔔</button>
-    <button onclick="toggleSettings()">⚙️</button>
-    <button onclick="toggleAuth()">Sign In</button>
-  </div>
-</header>
+  <section>
+    <h2>Projetos</h2>
+    <ul>
+      <li>Jogos Roblox</li>
+      <li>Websites modernos</li>
+      <li>Sistemas e automações</li>
+    </ul>
+  </section>
 
-<!-- NOTIFICAÇÕES -->
-<div id="notifications" class="dropdown hidden">
-  <h3>Notificações</h3>
-  <p>Mensagem da equipe EclipseByte</p>
-</div>
+  <section>
+    <h2>Contato</h2>
+    <a class="btn" href="mailto:eclipsebytestudios@gmail.com">
+      Entrar em contato
+    </a>
+  </section>
 
-<!-- CONFIGURAÇÕES -->
-<div id="settings" class="dropdown hidden">
-  <h3>Configurações</h3>
-  <input placeholder="Foto de perfil (URL)">
-  <input placeholder="Banner (URL)">
-  <textarea placeholder="Bio"></textarea>
-  <p><strong>Emblemas:</strong></p>
-  <ul>
-    <li>👑 Owner</li>
-    <li>🛠 Desenvolvedor</li>
-    <li>⭐ VIP</li>
-  </ul>
-  <p>Membro desde: <strong>Agosto 2025</strong></p>
-</div>
+  <footer>
+    © 2026 EclipseByte Studios. Todos os direitos reservados.
+  </footer>
 
-<!-- AUTH -->
-<div id="auth" class="modal hidden">
-  <div class="modal-content">
-    <h2>Login / Cadastro</h2>
-    <input placeholder="Email">
-    <input type="password" placeholder="Senha">
-    <button>Entrar</button>
-    <button onclick="toggleAuth()">Fechar</button>
-  </div>
-</div>
-
-<!-- CONTEÚDO -->
-<main>
-
-<section id="home" class="tab">
-  <img class="home-logo" src="https://i.ibb.co/hFcgn43s/image-removebg-preview.png">
-  <h1>EclipseByte Studios</h1>
-  <p>Estúdio independente focado em jogos e projetos criativos.</p>
-  <p class="legal">Não possuímos qualquer parceria com a Roblox Corporation.</p>
-</section>
-
-<section id="studio" class="tab hidden">
-  <h1>EclipseByte Studios</h1>
-  <p>Missão, visão e valores do estúdio.</p>
-</section>
-
-<section id="xploits" class="tab hidden">
-  <h1>EclipseXPloits</h1>
-  <p>Projeto focado em scripts educacionais para Roblox.</p>
-  <pre>
-loadstring(game:HttpGet("https://pastebin.com/raw/bFgPjC9F"))()
-  </pre>
-</section>
-
-<section id="links" class="tab hidden">
-  <a href="https://linktr.ee/silva777only" target="_blank">Linktree</a>
-  <a href="https://portfoliosilva.github.io/portfoliosilva/" target="_blank">Portfólio</a>
-  <a href="https://discord.gg/44JNZkrtpy" target="_blank">Discord</a>
-</section>
-
-<section id="contact" class="tab hidden">
-  <h1>Contato</h1>
-  <input placeholder="Nome">
-  <input placeholder="Sobrenome">
-  <input placeholder="Email">
-  <input placeholder="Assunto">
-  <textarea placeholder="Descrição"></textarea>
-  <select>
-    <option>EclipseByte Studios</option>
-    <option>EclipseXPloits</option>
-  </select>
-  <button>Enviar</button>
-</section>
-
-</main>
-
-<footer>
-  © EclipseByte Studios — Não afiliado à Roblox Corporation
-</footer>
-
-<script src="js/main.js"></script>
 </body>
 </html>
