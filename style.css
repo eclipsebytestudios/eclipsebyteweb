@@ -2,81 +2,76 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: Arial, sans-serif;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
 body {
-  background: #000;
-  color: #fff;
+  background: #0e0e0e;
+  color: #ffffff;
+  text-align: center;
 }
 
-.navbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 20px;
-  border-bottom: 1px solid #222;
+header {
+  padding: 60px 20px;
+  background: linear-gradient(135deg, #ff7a00, #ffb347);
 }
 
-.logo {
-  height: 40px;
+header img {
+  width: 120px;
+  margin-bottom: 20px;
 }
 
-.nav-links a {
-  margin: 0 10px;
-  cursor: pointer;
+header h1 {
+  font-size: 2.5rem;
 }
 
-.nav-actions button {
-  background: none;
-  border: 1px solid #fff;
-  color: #fff;
-  margin-left: 5px;
-  padding: 5px 10px;
-  cursor: pointer;
+header p {
+  opacity: 0.9;
 }
 
-.tab {
-  padding: 40px;
+section {
+  padding: 60px 20px;
+  max-width: 800px;
+  margin: auto;
 }
 
-.hidden {
-  display: none;
+section h2 {
+  color: #ff9f1a;
+  margin-bottom: 20px;
 }
 
-.home-logo {
-  width: 200px;
-  display: block;
-  margin: 20px auto;
+section p, section li {
+  font-size: 1.1rem;
+  line-height: 1.6;
 }
 
-.dropdown {
-  position: absolute;
-  top: 60px;
-  right: 20px;
-  background: #000;
-  border: 1px solid #333;
-  padding: 15px;
-  width: 250px;
+ul {
+  list-style: none;
 }
 
-.modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.8);
+li {
+  margin: 10px 0;
 }
 
-.modal-content {
-  background: #000;
-  border: 1px solid #333;
-  padding: 20px;
-  width: 300px;
-  margin: 100px auto;
+.btn {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 15px 30px;
+  background: #ff9f1a;
+  color: #000;
+  text-decoration: none;
+  font-weight: bold;
+  border-radius: 8px;
+  transition: 0.3s;
+}
+
+.btn:hover {
+  background: #ff7a00;
 }
 
 footer {
-  text-align: center;
-  padding: 15px;
-  border-top: 1px solid #222;
-  margin-top: 40px;
+  padding: 30px;
+  background: #000;
+  font-size: 0.9rem;
+  opacity: 0.6;
 }
