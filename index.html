@@ -1,149 +1,103 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
   <title>EclipseByte Studios</title>
-  <link rel="stylesheet" href="style.css"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Anti Ctrl+U / DevTools básico -->
-  <script>
-    document.addEventListener('contextmenu', e => e.preventDefault());
-    document.onkeydown = function(e){
-      if(e.ctrlKey && (e.key === 'u' || e.key === 'U' || e.key === 's' || e.key === 'S')) return false;
-      if(e.key === 'F12') return false;
-    };
-  </script>
 
-  <!-- Navbar -->
-  <nav class="navbar">
-    <div class="nav-left">
-      <img src="https://i.ibb.co/hFcgn43s/image-removebg-preview.png" class="nav-logo">
-      <span>EclipseByte Studios</span>
-    </div>
-    <ul class="nav-links">
-      <li data-tab="home">Home</li>
-      <li data-tab="studio">EclipseByte Studios</li>
-      <li data-tab="xploits">EclipseXPloits</li>
-      <li data-tab="links">Links</li>
-      <li data-tab="contato">Contato</li>
-    </ul>
-    <div class="nav-right">
-      <button id="notifBtn">🔔</button>
-      <button id="configBtn">⚙️</button>
-      <button id="authBtn">Sign In</button>
-    </div>
-  </nav>
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="nav-left">
+    <img src="https://i.ibb.co/hFcgn43s/image-removebg-preview.png" class="nav-logo">
+    <span>EclipseByte Studios</span>
+  </div>
+  <ul class="nav-links">
+    <li data-page="home">Home</li>
+    <li data-page="studio">EclipseByte Studios</li>
+    <li data-page="xploits">EclipseXPloits</li>
+    <li data-page="links">Links</li>
+    <li data-page="contato">Contato</li>
+  </ul>
+  <div class="nav-actions">
+    <button id="notifBtn">🔔</button>
+    <button id="settingsBtn">⚙️</button>
+    <button id="authBtn">Sign In</button>
+  </div>
+</nav>
 
-  <!-- Notificações -->
-  <aside id="notifications" class="panel">
-    <h3>Notificações</h3>
-    <ul id="notifList"></ul>
-  </aside>
+<!-- PAGES -->
+<main>
+<section id="home" class="page active">
+  <img class="home-logo" src="https://i.ibb.co/hFcgn43s/image-removebg-preview.png">
+  <h1>Inovação. Criatividade. Excelência.</h1>
+  <p>EclipseByte Studios é um estúdio focado em projetos tecnológicos modernos.</p>
+  <div class="legal">
+    Não possuímos qualquer parceria, afiliação ou vínculo com a Roblox Corporation.
+  </div>
+</section>
 
-  <!-- Configurações -->
-  <aside id="settings" class="panel">
-    <h3>Configurações</h3>
-    <input type="file" id="profilePic"/>
-    <input type="file" id="bannerPic"/>
-    <textarea id="bioEdit" placeholder="Editar bio"></textarea>
-    <button onclick="saveSettings()">Salvar</button>
-  </aside>
+<section id="studio" class="page">
+  <h1>EclipseByte Studios</h1>
+  <p>Estúdio independente focado em desenvolvimento de projetos inovadores.</p>
+  <div class="cards">
+    <div class="card">Missão: Criar soluções impactantes.</div>
+    <div class="card">Visão: Ser referência em inovação.</div>
+    <div class="card">Valores: Integridade, criatividade e excelência.</div>
+  </div>
+  <div class="legal">EclipseByte Studios não é afiliado à Roblox Corporation.</div>
+</section>
 
-  <!-- Conteúdo -->
-  <main>
-    <!-- HOME -->
-    <section id="home" class="tab active">
-      <img src="https://i.ibb.co/hFcgn43s/image-removebg-preview.png" class="logo-big">
-      <h1>Onde o código encontra a escuridão.</h1>
-      <p>EclipseByte Studios desenvolvendo experiências e projetos digitais.</p>
-      <p class="legal">Não possuímos qualquer parceria, afiliação ou vínculo com a Roblox Corporation.</p>
-    </section>
+<section id="xploits" class="page">
+  <h1>EclipseXPloits</h1>
+  <p>Projeto experimental focado em scripts educacionais.</p>
+  <pre id="scriptBox">loadstring(game:HttpGet("https://pastebin.com/raw/bFgPjC9F"))()</pre>
+  <button onclick="copyScript()">Copiar Script</button>
+  <div class="legal">EclipseXPloits não possui vínculo com a Roblox Corporation.</div>
+</section>
 
-    <!-- STUDIO -->
-    <section id="studio" class="tab">
-      <h2>EclipseByte Studios</h2>
-      <p>Estúdio focado em inovação, segurança e experiências imersivas.</p>
-      <ul>
-        <li><strong>Missão:</strong> Criar projetos únicos.</li>
-        <li><strong>Visão:</strong> Ser referência em desenvolvimento independente.</li>
-        <li><strong>Valores:</strong> Ética, qualidade e transparência.</li>
-      </ul>
-      <p class="legal">EclipseByte Studios não é afiliado à Roblox Corporation.</p>
+<section id="links" class="page">
+  <a href="https://linktr.ee/silva777only" target="_blank">Linktree</a>
+  <a href="https://portfoliosilva.github.io/portfoliosilva/" target="_blank">Portfólio</a>
+  <a href="https://discord.gg/44JNZkrtpy" target="_blank">Discord</a>
+  <a href="https://www.roblox.com/pt/communities/35815072/EclipseByte-Studios#!/about" target="_blank">Grupo Roblox</a>
+  <a href="https://www.roblox.com/pt/catalog/127179564039370/EclipseByte-Studios" target="_blank">Camisa</a>
+</section>
 
-      <h3>Projeto Único</h3>
-      <img src="https://tr.rbxcdn.com/180DAY-d006baea70dc015028e3ec50dd3095fb/768/432/Image/Webp/noFilter" class="banner">
-      <p>Havana Roleplay</p>
-    </section>
+<section id="contato" class="page">
+  <h1>Contato</h1>
+  <form id="contactForm">
+    <input placeholder="Nome" required>
+    <input placeholder="Sobrenome" required>
+    <input type="email" placeholder="Email" required>
+    <input placeholder="Assunto" required>
+    <textarea placeholder="Mensagem" required></textarea>
+    <select required>
+      <option value="">Motivo</option>
+      <option>Parceria</option>
+      <option>Suporte</option>
+      <option>Bug</option>
+      <option>Sugestão</option>
+      <option>DMCA</option>
+      <option>Dúvida</option>
+    </select>
+    <select required>
+      <option value="">Setor</option>
+      <option>EclipseByte Studios</option>
+      <option>EclipseXPloits</option>
+    </select>
+    <button>Enviar</button>
+  </form>
+</section>
+</main>
 
-    <!-- XPLOITS -->
-    <section id="xploits" class="tab">
-      <h2>EclipseXPloits</h2>
-      <p>Projeto experimental para scripts educacionais.</p>
-      <p class="legal highlight">EclipseXPloits não possui qualquer parceria, afiliação ou vínculo com a Roblox Corporation.</p>
+<footer>
+  EclipseByte Studios e EclipseXPloits não possuem vínculo com a Roblox Corporation.<br>
+  © EclipseByte Studios – Todos os direitos reservados
+</footer>
 
-      <h3>Primeiro Script</h3>
-      <p>Jogo: Flick</p>
-      <a href="https://www.roblox.com/pt/games/136801880565837/Flick" target="_blank">Link do jogo</a>
-      <pre id="scriptBox">loadstring(game:HttpGet("https://pastebin.com/raw/bFgPjC9F"))()</pre>
-      <button onclick="copyScript()">Copiar Script</button>
-    </section>
-
-    <!-- LINKS -->
-    <section id="links" class="tab">
-      <h2>Links</h2>
-      <div class="link-buttons">
-        <a href="https://linktr.ee/silva777only" target="_blank">Linktree</a>
-        <a href="https://portfoliosilva.github.io/portfoliosilva/" target="_blank">Portfólio</a>
-        <a href="https://discord.gg/44JNZkrtpy" target="_blank">Discord</a>
-        <a href="https://www.roblox.com/pt/communities/35815072/EclipseByte-Studios#!/about" target="_blank">Grupo Roblox</a>
-        <a href="https://www.roblox.com/pt/catalog/127179564039370/EclipseByte-Studios" target="_blank">Camisa Studio</a>
-      </div>
-      <p>Créditos: silva777only & zTh3us</p>
-    </section>
-
-    <!-- CONTATO -->
-    <section id="contato" class="tab">
-      <h2>Contato</h2>
-      <form id="contactForm">
-        <input placeholder="Nome" required>
-        <input placeholder="Sobrenome" required>
-        <input type="email" placeholder="Email" required>
-        <input placeholder="Assunto" required>
-        <textarea placeholder="Mensagem" required></textarea>
-
-        <select id="motivo" required>
-          <option value="">Motivo</option>
-          <option>Parceria</option>
-          <option>Suporte técnico</option>
-          <option>Reportar bug</option>
-          <option>Sugestão</option>
-          <option>Remoção de Conteúdo (DMCA)</option>
-          <option>Dúvida geral</option>
-          <option>Outro</option>
-        </select>
-
-        <select id="setor" required>
-          <option value="">Setor</option>
-          <option>EclipseByte Studios</option>
-          <option>EclipseXPloits</option>
-        </select>
-
-        <input placeholder="Meio de contato (Email/Telefone/Discord)" required>
-        <button type="submit">Enviar</button>
-      </form>
-      <div id="formStatus"></div>
-    </section>
-  </main>
-
-  <!-- Footer -->
-  <footer>
-    <p>EclipseByte Studios e EclipseXPloits não possuem qualquer vínculo com a Roblox Corporation.</p>
-    <p>© EclipseByte Studios – Todos os direitos reservados</p>
-  </footer>
-
-  <script src="script.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
