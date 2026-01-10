@@ -54,8 +54,6 @@ const ADMIN_USERNAME = "silva777only"
 
 // ==================== INICIALIZAÇÃO ====================
 document.addEventListener("DOMContentLoaded", async () => {
-  await trackVisit()
-
   initNavigation()
   initScrollEffects()
   initModals()
@@ -67,6 +65,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   initAdminPanel()
   initUsernameCheck()
   updateYear()
+
+  await trackVisit()
   checkBannedIP()
 })
 
@@ -136,7 +136,18 @@ async function trackVisit() {
 
 // ==================== VERIFICAÇÃO DE BAN ====================
 function checkBannedIP() {
+  // Se não conseguiu obter o IP, não bloqueia
+  if (!userIP || userIP === "Unknown" || userIP === null) {
+    return
+  }
+
   const bannedIPs = JSON.parse(localStorage.getItem("eclipsebyte_banned_ips") || "[]")
+
+  // Verifica se é um array válido e se o IP está na lista
+  if (!Array.isArray(bannedIPs) || bannedIPs.length === 0) {
+    return
+  }
+
   if (bannedIPs.includes(userIP)) {
     document.body.innerHTML = `
       <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; background: #000; color: #fff; text-align: center; padding: 20px;">
@@ -633,10 +644,26 @@ function initAdminPanel() {
   closeAdmin.addEventListener("click", closePanels)
 
   banIpBtn.addEventListener("click", () => {
-    const ip = document.getElementById("banIpInput").value.trim()
-    if (ip) {
-      banIP(ip)
-      document.getElementById("banIpInput").value = ""
+    const ipInput = document.getElementById("banIpInput")
+    const ip = ipInput.value.trim()
+
+    if (!ip) {
+      showToast("Digite um IP para banir", "error")
+      return
+    }
+
+    const bannedIPs = JSON.parse(localStorage.getItem("eclipsebyte_banned_ips") || "[]")
+    if (!bannedIPs.includes(ip)) {
+      bannedIPs.push(ip)
+      localStorage.setItem("eclipsebyte_banned_ips", JSON.stringify(bannedIPs))
+      showToast(`IP ${ip} foi banido`, "success")
+      ipInput.value = ""
+      loadAdminData()
+
+      // Envia webhook
+      sendAdminWebhook("ban", ip)
+    } else {
+      showToast("Este IP já está banido", "error")
     }
   })
 }
@@ -645,145 +672,200 @@ function loadAdminData() {
   const users = JSON.parse(localStorage.getItem("eclipsebyte_users") || "[]")
   const bannedIPs = JSON.parse(localStorage.getItem("eclipsebyte_banned_ips") || "[]")
 
-  // Load users list
   const usersList = document.getElementById("adminUsersList")
-  usersList.innerHTML = users
-    .map(
-      (user) => `
-    <div class="admin-user-item">
-      <div class="admin-user-info">
-        <img src="${user.avatar || generateDefaultAvatar(user.username)}" class="admin-user-avatar" alt="${user.username}">
-        <div>
-          <div class="admin-user-name">${user.username}</div>
-          <div class="admin-user-ip">IP: ${user.registeredIP || "Unknown"}</div>
-        </div>
-      </div>
-      ${user.username !== ADMIN_USERNAME ? `<button class="btn btn-sm btn-danger" onclick="banUserByIP('${user.registeredIP}', '${user.username}')">Banir</button>` : ""}
-    </div>
-  `,
-    )
-    .join("")
+  usersList.innerHTML = ""
 
-  // Load banned IPs
+  users.forEach((user) => {
+    const userItem = document.createElement("div")
+    userItem.className = "admin-user-item"
+    userItem.innerHTML = `
+      <div class="admin-user-info">
+        <span class="admin-user-name">${user.username}</span>
+        <span class="admin-user-ip">${user.registeredIP || "N/A"}</span>
+      </div>
+      <button class="btn btn-sm btn-danger" onclick="banUserByIP('${user.registeredIP}', '${user.username}')">
+        Banir IP
+      </button>
+    `
+    usersList.appendChild(userItem)
+  })
+
   const bannedList = document.getElementById("bannedIpsList")
-  bannedList.innerHTML =
-    bannedIPs
-      .map(
-        (ip) => `
-    <div class="banned-ip-item">
-      <span>${ip}</span>
-      <button class="btn btn-sm btn-outline" onclick="unbanIP('${ip}')">Desbanir</button>
-    </div>
-  `,
-      )
-      .join("") || '<p style="color: #666; font-size: 0.85rem;">Nenhum IP banido</p>'
+  bannedList.innerHTML = ""
+
+  if (bannedIPs.length === 0) {
+    bannedList.innerHTML = '<p class="empty-text">Nenhum IP banido</p>'
+  } else {
+    bannedIPs.forEach((ip) => {
+      const ipItem = document.createElement("div")
+      ipItem.className = "banned-ip-item"
+      ipItem.innerHTML = `
+        <span>${ip}</span>
+        <button class="btn btn-sm btn-outline" onclick="unbanIP('${ip}')">Desbanir</button>
+      `
+      bannedList.appendChild(ipItem)
+    })
+  }
 }
 
-function banIP(ip) {
+function banUserByIP(ip, username) {
+  if (!ip || ip === "N/A") {
+    showToast("Este usuário não tem IP registrado", "error")
+    return
+  }
+
   const bannedIPs = JSON.parse(localStorage.getItem("eclipsebyte_banned_ips") || "[]")
   if (!bannedIPs.includes(ip)) {
     bannedIPs.push(ip)
     localStorage.setItem("eclipsebyte_banned_ips", JSON.stringify(bannedIPs))
-    showToast(`IP ${ip} banido com sucesso`, "success")
+    showToast(`Usuário ${username} banido (IP: ${ip})`, "success")
     loadAdminData()
+    sendAdminWebhook("ban", ip, username)
   } else {
     showToast("Este IP já está banido", "error")
   }
 }
 
-function banUserByIP(ip, username) {
-  if (ip && ip !== "Unknown") {
-    banIP(ip)
-    // Remove user
-    const users = JSON.parse(localStorage.getItem("eclipsebyte_users") || "[]")
-    const filteredUsers = users.filter((u) => u.username !== username)
-    localStorage.setItem("eclipsebyte_users", JSON.stringify(filteredUsers))
+function unbanIP(ip) {
+  const bannedIPs = JSON.parse(localStorage.getItem("eclipsebyte_banned_ips") || "[]")
+  const index = bannedIPs.indexOf(ip)
+  if (index > -1) {
+    bannedIPs.splice(index, 1)
+    localStorage.setItem("eclipsebyte_banned_ips", JSON.stringify(bannedIPs))
+    showToast(`IP ${ip} foi desbanido`, "success")
     loadAdminData()
-  } else {
-    showToast("IP do usuário desconhecido", "error")
+    sendAdminWebhook("unban", ip)
   }
 }
 
-function unbanIP(ip) {
-  const bannedIPs = JSON.parse(localStorage.getItem("eclipsebyte_banned_ips") || "[]")
-  const filtered = bannedIPs.filter((i) => i !== ip)
-  localStorage.setItem("eclipsebyte_banned_ips", JSON.stringify(filtered))
-  showToast(`IP ${ip} desbanido`, "success")
-  loadAdminData()
+async function sendAdminWebhook(action, ip, username = null) {
+  const embed = {
+    embeds: [
+      {
+        title: action === "ban" ? "🔨 Usuário Banido" : "✅ Usuário Desbanido",
+        color: action === "ban" ? 15158332 : 3066993,
+        fields: [
+          { name: "IP", value: ip, inline: true },
+          { name: "Usuário", value: username || "N/A", inline: true },
+          { name: "Admin", value: ADMIN_USERNAME, inline: true },
+          { name: "Data/Hora", value: new Date().toLocaleString("pt-BR"), inline: false },
+        ],
+        footer: { text: "EclipseByte Studios - Admin Panel" },
+        timestamp: new Date().toISOString(),
+      },
+    ],
+  }
+
+  try {
+    await fetch(WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(embed),
+    })
+  } catch (error) {
+    console.log("Webhook error")
+  }
 }
 
-// Make functions available globally for onclick handlers
-window.banUserByIP = banUserByIP
-window.unbanIP = unbanIP
-
-// ==================== SISTEMA DE AUTENTICAÇÃO ====================
+// ==================== AUTENTICAÇÃO ====================
 function initAuth() {
   const signinForm = document.getElementById("signinForm")
   const signupForm = document.getElementById("signupForm")
 
-  signinForm.addEventListener("submit", async (e) => {
+  signinForm.addEventListener("submit", (e) => {
     e.preventDefault()
-
-    const usernameOrEmail = document.getElementById("signinUsername").value
-    const password = document.getElementById("signinPassword").value
-
-    const users = JSON.parse(localStorage.getItem("eclipsebyte_users") || "[]")
-    const user = users.find(
-      (u) => (u.username === usernameOrEmail || u.email === usernameOrEmail) && u.password === password,
-    )
-
-    if (user) {
-      localStorage.setItem("eclipsebyte_current_user", JSON.stringify(user))
-      document.getElementById("signinModal").classList.add("hidden")
-      updateNavbarProfile()
-      showToast(`Bem-vindo de volta, ${user.username}!`, "success")
-      signinForm.reset()
-
-      await sendLoginWebhook(user.username)
-    } else {
-      showToast("Credenciais inválidas", "error")
-    }
+    handleSignin()
   })
 
-  signupForm.addEventListener("submit", async (e) => {
+  signupForm.addEventListener("submit", (e) => {
     e.preventDefault()
-
-    const username = document.getElementById("signupUsername").value.trim()
-    const email = document.getElementById("signupEmail").value
-    const password = document.getElementById("signupPassword").value
-    const bio = document.getElementById("signupBio").value
-    const avatarInput = document.getElementById("signupAvatar")
-
-    const users = JSON.parse(localStorage.getItem("eclipsebyte_users") || "[]")
-
-    if (users.find((u) => u.username.toLowerCase() === username.toLowerCase())) {
-      showToast("Este username já está em uso", "error")
-      return
-    }
-
-    if (users.find((u) => u.email === email)) {
-      showToast("Este email já está cadastrado", "error")
-      return
-    }
-
-    let avatar = generateDefaultAvatar(username)
-    if (avatarInput.files[0]) {
-      const reader = new FileReader()
-      reader.onload = async (event) => {
-        avatar = event.target.result
-        await completeSignup(username, email, password, bio, avatar)
-      }
-      reader.readAsDataURL(avatarInput.files[0])
-    } else {
-      await completeSignup(username, email, password, bio, avatar)
-    }
+    handleSignup()
   })
 
-  updateNavbarProfile()
+  // Verifica se já está logado
+  const currentUser = getCurrentUser()
+  if (currentUser) {
+    updateNavbarProfile()
+  }
 }
 
-async function completeSignup(username, email, password, bio, avatar) {
+async function handleSignin() {
+  const usernameOrEmail = document.getElementById("signinUsername").value
+  const password = document.getElementById("signinPassword").value
+
   const users = JSON.parse(localStorage.getItem("eclipsebyte_users") || "[]")
+  const user = users.find(
+    (u) => (u.username === usernameOrEmail || u.email === usernameOrEmail) && u.password === password,
+  )
+
+  if (user) {
+    localStorage.setItem("eclipsebyte_current_user", JSON.stringify(user))
+    document.getElementById("signinModal").classList.add("hidden")
+    updateNavbarProfile()
+    showToast(`Bem-vindo de volta, ${user.username}!`, "success")
+
+    // Webhook de login
+    const embed = {
+      embeds: [
+        {
+          title: "🔑 Login Realizado",
+          color: 3066993,
+          fields: [
+            { name: "👤 Usuário", value: user.username, inline: true },
+            { name: "📧 Email", value: user.email, inline: true },
+            { name: "🌐 IP", value: userIP || "Unknown", inline: true },
+            { name: "📍 Localização", value: userLocation || "Unknown", inline: true },
+            { name: "🕐 Data/Hora", value: new Date().toLocaleString("pt-BR"), inline: false },
+          ],
+          footer: { text: "EclipseByte Studios - Sistema de Login" },
+          timestamp: new Date().toISOString(),
+        },
+      ],
+    }
+
+    try {
+      await fetch(WEBHOOK_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(embed),
+      })
+    } catch (error) {
+      console.log("Webhook error")
+    }
+
+    // Reset form
+    document.getElementById("signinForm").reset()
+  } else {
+    showToast("Credenciais inválidas", "error")
+  }
+}
+
+async function handleSignup() {
+  const username = document.getElementById("signupUsername").value.trim()
+  const email = document.getElementById("signupEmail").value.trim()
+  const password = document.getElementById("signupPassword").value
+  const bio = document.getElementById("signupBio").value
+  const avatarInput = document.getElementById("signupAvatar")
+
+  // Verifica username único
+  const users = JSON.parse(localStorage.getItem("eclipsebyte_users") || "[]")
+  const usernameTaken = users.some((u) => u.username.toLowerCase() === username.toLowerCase())
+
+  if (usernameTaken) {
+    showToast("Este username já está em uso", "error")
+    return
+  }
+
+  const emailTaken = users.some((u) => u.email.toLowerCase() === email.toLowerCase())
+  if (emailTaken) {
+    showToast("Este email já está em uso", "error")
+    return
+  }
+
+  let avatar = null
+  if (avatarInput.files[0]) {
+    avatar = await readFileAsDataURL(avatarInput.files[0])
+  }
 
   const newUser = {
     username,
@@ -792,8 +874,8 @@ async function completeSignup(username, email, password, bio, avatar) {
     bio,
     avatar,
     banner: null,
+    registeredIP: userIP,
     createdAt: new Date().toISOString(),
-    registeredIP: userIP, // Store IP for recovery
   }
 
   users.push(newUser)
@@ -801,59 +883,23 @@ async function completeSignup(username, email, password, bio, avatar) {
   localStorage.setItem("eclipsebyte_current_user", JSON.stringify(newUser))
 
   document.getElementById("signupModal").classList.add("hidden")
-  document.getElementById("signupForm").reset()
-  document.getElementById("avatarPreview").classList.add("hidden")
-  document.getElementById("usernameStatus").textContent = ""
-
   updateNavbarProfile()
   showToast(`Conta criada com sucesso! Bem-vindo, ${username}!`, "success")
 
-  await sendRegisterWebhook(username, email)
-}
-
-async function sendLoginWebhook(username) {
-  const embed = {
-    embeds: [
-      {
-        title: "🔐 Login Realizado",
-        color: 5763719,
-        fields: [
-          { name: "👤 Usuário", value: username, inline: true },
-          { name: "🌐 IP", value: userIP || "Unknown", inline: true },
-          { name: "📍 Localização", value: userLocation || "Unknown", inline: true },
-          { name: "🕐 Data/Hora", value: new Date().toLocaleString("pt-BR"), inline: false },
-        ],
-        footer: { text: "EclipseByte Studios - Sistema de Auth" },
-        timestamp: new Date().toISOString(),
-      },
-    ],
-  }
-
-  try {
-    await fetch(WEBHOOK_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(embed),
-    })
-  } catch (error) {
-    console.log("Webhook error")
-  }
-}
-
-async function sendRegisterWebhook(username, email) {
+  // Webhook de registro
   const embed = {
     embeds: [
       {
         title: "📝 Novo Registro",
-        color: 15844367,
+        color: 5763719,
         fields: [
           { name: "👤 Usuário", value: username, inline: true },
           { name: "📧 Email", value: email, inline: true },
           { name: "🌐 IP", value: userIP || "Unknown", inline: true },
-          { name: "📍 Localização", value: userLocation || "Unknown", inline: false },
+          { name: "📍 Localização", value: userLocation || "Unknown", inline: true },
           { name: "🕐 Data/Hora", value: new Date().toLocaleString("pt-BR"), inline: false },
         ],
-        footer: { text: "EclipseByte Studios - Sistema de Auth" },
+        footer: { text: "EclipseByte Studios - Sistema de Registro" },
         timestamp: new Date().toISOString(),
       },
     ],
@@ -868,6 +914,19 @@ async function sendRegisterWebhook(username, email) {
   } catch (error) {
     console.log("Webhook error")
   }
+
+  // Reset form
+  document.getElementById("signupForm").reset()
+  document.getElementById("avatarPreview").classList.add("hidden")
+}
+
+function readFileAsDataURL(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = (e) => resolve(e.target.result)
+    reader.onerror = reject
+    reader.readAsDataURL(file)
+  })
 }
 
 function getCurrentUser() {
@@ -888,7 +947,8 @@ function updateNavbarProfile() {
     navAvatar.src = currentUser.avatar || generateDefaultAvatar(currentUser.username)
     navUsername.textContent = currentUser.username
 
-    if (currentUser.username.toLowerCase() === ADMIN_USERNAME.toLowerCase()) {
+    // Mostra botão admin se for o admin
+    if (currentUser.username === ADMIN_USERNAME) {
       adminBtn.classList.remove("hidden")
     } else {
       adminBtn.classList.add("hidden")
@@ -903,102 +963,140 @@ function updateNavbarProfile() {
 function logout() {
   localStorage.removeItem("eclipsebyte_current_user")
   updateNavbarProfile()
-  showToast("Você saiu da sua conta", "success")
+  showToast("Você saiu da conta", "success")
 
+  // Volta para home
   const navLinks = document.querySelectorAll(".nav-link")
   const pages = document.querySelectorAll(".page")
 
   navLinks.forEach((l) => l.classList.remove("active"))
-  document.querySelector('[data-page="home"]').classList.add("active")
-
   pages.forEach((p) => p.classList.remove("active"))
+
+  document.querySelector('[data-page="home"]').classList.add("active")
   document.getElementById("home").classList.add("active")
 }
 
 function generateDefaultAvatar(username) {
-  const initial = username.charAt(0).toUpperCase()
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">
-        <rect width="100" height="100" fill="#262626"/>
-        <text x="50" y="50" font-family="Arial, sans-serif" font-size="40" fill="#ffffff" text-anchor="middle" dominant-baseline="central">${initial}</text>
-    </svg>`
-  return "data:image/svg+xml;base64," + btoa(svg)
+  const letter = username.charAt(0).toUpperCase()
+  const canvas = document.createElement("canvas")
+  canvas.width = 100
+  canvas.height = 100
+  const ctx = canvas.getContext("2d")
+
+  // Background gradient
+  const gradient = ctx.createLinearGradient(0, 0, 100, 100)
+  gradient.addColorStop(0, "#333")
+  gradient.addColorStop(1, "#111")
+  ctx.fillStyle = gradient
+  ctx.fillRect(0, 0, 100, 100)
+
+  // Letter
+  ctx.fillStyle = "#fff"
+  ctx.font = "bold 50px Arial"
+  ctx.textAlign = "center"
+  ctx.textBaseline = "middle"
+  ctx.fillText(letter, 50, 50)
+
+  return canvas.toDataURL()
 }
 
-function getUserBadges(username) {
-  const badges = []
+// ==================== NOTIFICAÇÕES ====================
+function initNotifications() {
+  loadNotifications()
+}
 
-  if (username.toLowerCase() === ADMIN_USERNAME.toLowerCase()) {
-    badges.push({
-      name: "Desenvolvedor",
-      class: "developer",
-      image:
-        "data:image/svg+xml;base64," +
-        btoa(
-          `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="4" fill="#fff"/><path d="M10 12l-4 4 4 4M22 12l4 4-4 4M18 10l-4 12" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
-        ),
-    })
-    badges.push({
-      name: "Owner",
-      class: "owner",
-      image:
-        "data:image/svg+xml;base64," +
-        btoa(
-          `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="4" fill="#262626"/><path d="M16 6l3 6 6 1-4 4 1 6-6-3-6 3 1-6-4-4 6-1 3-6z" fill="#fff"/></svg>`,
-        ),
-    })
+function loadNotifications() {
+  const currentUser = getCurrentUser()
+  const notificationList = document.getElementById("notificationList")
+  const notifBadge = document.getElementById("notifBadge")
+
+  // Changelogs globais
+  const globalNotifications = [
+    {
+      title: "🚀 Site Lançado!",
+      message: "Bem-vindo ao novo site do EclipseByte Studios!",
+      icon: "🎉",
+      time: "10/01/2026",
+    },
+    {
+      title: "🎮 Havana Roleplay",
+      message: "Nosso projeto principal está disponível para jogar!",
+      icon: "🎮",
+      time: "09/01/2026",
+    },
+    {
+      title: "💀 EclipseXPloits",
+      message: "Nova seção de scripts adicionada ao site.",
+      icon: "💀",
+      time: "08/01/2026",
+    },
+    {
+      title: "🔧 Sistema de Contas",
+      message: "Agora você pode criar sua conta e personalizar seu perfil!",
+      icon: "👤",
+      time: "07/01/2026",
+    },
+  ]
+
+  let userNotifications = []
+  if (currentUser) {
+    userNotifications = JSON.parse(localStorage.getItem(`eclipsebyte_notifications_${currentUser.username}`) || "[]")
   }
 
-  badges.push({
-    name: "Assinante VIP",
-    class: "vip",
-    image:
-      "data:image/svg+xml;base64," +
-      btoa(
-        `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="4" fill="#404040"/><path d="M16 8l2 4h5l-4 3 2 5-5-3-5 3 2-5-4-3h5l2-4z" fill="#fff"/></svg>`,
-      ),
-  })
+  const allNotifications = [...userNotifications, ...globalNotifications]
 
-  return badges
-}
+  notificationList.innerHTML = ""
 
-function createBadgeElement(badge) {
-  if (badge.image) {
-    const container = document.createElement("div")
-    container.className = "badge-img"
-    container.innerHTML = `
-      <img src="${badge.image}" alt="${badge.name}">
-      <span class="badge-tooltip">${badge.name}</span>
+  if (allNotifications.length === 0) {
+    notificationList.innerHTML = '<p class="empty-notifications">Nenhuma notificação</p>'
+    notifBadge.textContent = "0"
+    notifBadge.style.display = "none"
+    return
+  }
+
+  notifBadge.textContent = userNotifications.length > 0 ? userNotifications.length : ""
+  notifBadge.style.display = userNotifications.length > 0 ? "flex" : "none"
+
+  allNotifications.forEach((notif, index) => {
+    const notifItem = document.createElement("div")
+    notifItem.className = "notification-item"
+    if (index < userNotifications.length) {
+      notifItem.classList.add("unread")
+    }
+    notifItem.innerHTML = `
+      <div class="notification-icon">${notif.icon || "📢"}</div>
+      <div class="notification-content">
+        <h4>${notif.title}</h4>
+        <p>${notif.message}</p>
+        <span class="notification-time">${notif.time}</span>
+      </div>
     `
-    return container
-  } else {
-    const badgeEl = document.createElement("span")
-    badgeEl.className = `badge ${badge.class}`
-    badgeEl.textContent = badge.name
-    return badgeEl
-  }
+    notificationList.appendChild(notifItem)
+  })
 }
 
+// ==================== PERFIL ====================
 function updateProfilePage() {
   const currentUser = getCurrentUser()
   if (!currentUser) return
 
-  document.getElementById("profileImg").src = currentUser.avatar || generateDefaultAvatar(currentUser.username)
   document.getElementById("profileUsername").textContent = currentUser.username
   document.getElementById("profileBio").textContent = currentUser.bio || "Sem bio definida."
+  document.getElementById("profileImg").src = currentUser.avatar || generateDefaultAvatar(currentUser.username)
 
+  // Banner
   const profileBanner = document.getElementById("profileBanner")
   if (currentUser.banner) {
     profileBanner.style.backgroundImage = `url(${currentUser.banner})`
+    profileBanner.style.backgroundSize = "cover"
+    profileBanner.style.backgroundPosition = "center"
   }
 
+  // Member since
   const createdAt = new Date(currentUser.createdAt)
-  const formattedDate = createdAt.toLocaleDateString("pt-BR", {
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  })
-  document.getElementById("profileMemberSince").textContent = `Membro desde: ${formattedDate}`
+  document.getElementById("profileMemberSince").textContent = `Membro desde: ${createdAt.toLocaleDateString("pt-BR")}`
 
+  // Badges
   const badgesContainer = document.getElementById("profileBadges")
   badgesContainer.innerHTML = ""
 
@@ -1009,207 +1107,201 @@ function updateProfilePage() {
   })
 }
 
+function getUserBadges(username) {
+  const badges = []
+
+  // Badge de membro
+  badges.push({
+    name: "Membro",
+    icon: "👤",
+    color: "#666",
+    tooltip: "Membro do EclipseByte Studios",
+  })
+
+  // Badges especiais para silva777only
+  if (username === ADMIN_USERNAME) {
+    badges.unshift({
+      name: "Owner",
+      icon: "👑",
+      color: "#FFD700",
+      tooltip: "Dono do EclipseByte Studios",
+    })
+    badges.splice(1, 0, {
+      name: "Desenvolvedor",
+      icon: "💻",
+      color: "#00D4FF",
+      tooltip: "Desenvolvedor do Site",
+    })
+    badges.push({
+      name: "VIP",
+      icon: "⭐",
+      color: "#FF6B6B",
+      tooltip: "Assinante VIP",
+    })
+  }
+
+  return badges
+}
+
+function createBadgeElement(badge) {
+  const badgeEl = document.createElement("div")
+  badgeEl.className = "badge-item"
+  badgeEl.setAttribute("data-tooltip", badge.tooltip)
+  badgeEl.innerHTML = `
+    <span class="badge-icon" style="background: ${badge.color}20; border-color: ${badge.color};">${badge.icon}</span>
+    <span class="badge-name">${badge.name}</span>
+  `
+  return badgeEl
+}
+
 // ==================== FORMULÁRIO DE CONTATO ====================
 function initContactForm() {
   const contactForm = document.getElementById("contactForm")
-  const formStatus = document.getElementById("formStatus")
-  const submitBtn = document.getElementById("submitBtn")
 
   contactForm.addEventListener("submit", async (e) => {
     e.preventDefault()
-
-    submitBtn.disabled = true
-    submitBtn.innerHTML = "<span>Enviando...</span>"
-
-    const formData = {
-      firstName: document.getElementById("firstName").value,
-      lastName: document.getElementById("lastName").value,
-      email: document.getElementById("email").value,
-      subject: document.getElementById("subject").value,
-      message: document.getElementById("message").value,
-      contactMethod: document.getElementById("contactMethod").value,
-      contactInfo: document.getElementById("contactInfo").value,
-      reason: document.getElementById("reason").value,
-      sector: document.getElementById("sector").value,
-    }
-
-    const reasonTranslations = {
-      partnership: "Parceria",
-      support: "Suporte Técnico",
-      bug: "Reportar Bug",
-      suggestion: "Sugestão",
-      dmca: "Remoção de Conteúdo (DMCA)",
-      question: "Dúvida Geral",
-      other: "Outro",
-    }
-
-    const contactMethodTranslations = {
-      email: "Email",
-      phone: "Número de Telefone",
-      discord: "Discord",
-    }
-
-    const embed = {
-      embeds: [
-        {
-          title: "📩 Nova Mensagem de Contato",
-          color: 16777215,
-          fields: [
-            { name: "👤 Nome Completo", value: `${formData.firstName} ${formData.lastName}`, inline: true },
-            { name: "📧 Email", value: formData.email, inline: true },
-            { name: "🏢 Setor", value: formData.sector, inline: true },
-            { name: "📋 Assunto", value: formData.subject, inline: false },
-            { name: "🎯 Motivo", value: reasonTranslations[formData.reason] || formData.reason, inline: true },
-            {
-              name: "📱 Meio de Contato",
-              value: `${contactMethodTranslations[formData.contactMethod]}: ${formData.contactInfo}`,
-              inline: true,
-            },
-            { name: "💬 Mensagem", value: formData.message, inline: false },
-          ],
-          footer: { text: "EclipseByte Studios - Sistema de Contato" },
-          timestamp: new Date().toISOString(),
-        },
-      ],
-    }
-
-    try {
-      const response = await fetch(WEBHOOK_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(embed),
-      })
-
-      if (response.ok) {
-        formStatus.className = "form-status success"
-        formStatus.innerHTML = "✅ Mensagem enviada com sucesso! Entraremos em contato em breve."
-        formStatus.classList.remove("hidden")
-        contactForm.reset()
-        showToast("Mensagem enviada com sucesso!", "success")
-      } else {
-        throw new Error("Erro ao enviar")
-      }
-    } catch (error) {
-      formStatus.className = "form-status error"
-      formStatus.innerHTML = "❌ Erro ao enviar mensagem. Por favor, tente novamente."
-      formStatus.classList.remove("hidden")
-      showToast("Erro ao enviar mensagem", "error")
-    }
-
-    submitBtn.disabled = false
-    submitBtn.innerHTML = `<span>Enviar Mensagem</span>
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="22" y1="2" x2="11" y2="13"></line>
-                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-            </svg>`
-
-    setTimeout(() => {
-      formStatus.classList.add("hidden")
-    }, 5000)
+    await handleContactSubmit()
   })
 }
 
-// ==================== NOTIFICAÇÕES ====================
-function initNotifications() {
-  loadNotifications()
-}
+async function handleContactSubmit() {
+  const submitBtn = document.getElementById("submitBtn")
+  const formStatus = document.getElementById("formStatus")
 
-function loadNotifications() {
-  const notificationList = document.getElementById("notificationList")
-  const currentUser = getCurrentUser()
+  const firstName = document.getElementById("firstName").value
+  const lastName = document.getElementById("lastName").value
+  const email = document.getElementById("email").value
+  const subject = document.getElementById("subject").value
+  const message = document.getElementById("message").value
+  const contactMethod = document.getElementById("contactMethod").value
+  const contactInfo = document.getElementById("contactInfo").value
+  const reason = document.getElementById("reason").value
+  const sector = document.getElementById("sector").value
 
-  // Default notifications (changelogs)
-  const defaultNotifications = [
-    {
-      title: "📢 Changelog v2.0",
-      message: "Nova página de Projetos com Havana Roleplay! Sistema de contas melhorado.",
-      icon: "🆕",
-      time: "Hoje",
-      unread: true,
-    },
-    {
-      title: "🎮 Havana Roleplay",
-      message: "Nosso novo projeto principal está disponível! Confira na aba Projetos.",
-      icon: "🎮",
-      time: "Hoje",
-      unread: true,
-    },
-    {
-      title: "🔐 Sistema de Segurança",
-      message: "Novo sistema de recuperação de senha implementado.",
-      icon: "🔒",
-      time: "Recente",
-      unread: false,
-    },
-    {
-      title: "👥 Grupo Roblox",
-      message: "Entre no nosso grupo oficial do Roblox! Link disponível na aba Links.",
-      icon: "👥",
-      time: "1 dia atrás",
-      unread: false,
-    },
-    {
-      title: "Bem-vindo ao EclipseByte",
-      message: "Obrigado por fazer parte da nossa comunidade!",
-      icon: "🎉",
-      time: "Sempre",
-      unread: false,
-    },
-  ]
+  submitBtn.disabled = true
+  submitBtn.innerHTML = "<span>Enviando...</span>"
 
-  // Get user-specific notifications
-  let userNotifications = []
-  if (currentUser) {
-    userNotifications = JSON.parse(localStorage.getItem(`eclipsebyte_notifications_${currentUser.username}`) || "[]")
+  const embed = {
+    embeds: [
+      {
+        title: "📩 Nova Mensagem de Contato",
+        color: 16777215,
+        fields: [
+          { name: "👤 Nome Completo", value: `${firstName} ${lastName}`, inline: true },
+          { name: "📧 Email", value: email, inline: true },
+          { name: "🏢 Setor", value: sector, inline: true },
+          { name: "📋 Motivo", value: reason, inline: true },
+          { name: "💬 Meio de Contato", value: `${contactMethod}: ${contactInfo}`, inline: true },
+          { name: "📝 Assunto", value: subject, inline: false },
+          { name: "💭 Mensagem", value: message, inline: false },
+        ],
+        footer: { text: "EclipseByte Studios - Formulário de Contato" },
+        timestamp: new Date().toISOString(),
+      },
+    ],
   }
 
-  const allNotifications = [...userNotifications, ...defaultNotifications]
+  try {
+    const response = await fetch(WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(embed),
+    })
 
-  // Update badge count
-  const unreadCount = allNotifications.filter((n) => n.unread).length
-  const notifBadge = document.getElementById("notifBadge")
-  notifBadge.textContent = unreadCount > 0 ? unreadCount : allNotifications.length
+    if (response.ok) {
+      formStatus.className = "form-status success"
+      formStatus.textContent = "Mensagem enviada com sucesso! Entraremos em contato em breve."
+      formStatus.classList.remove("hidden")
+      document.getElementById("contactForm").reset()
+      showToast("Mensagem enviada com sucesso!", "success")
+    } else {
+      throw new Error("Erro ao enviar")
+    }
+  } catch (error) {
+    formStatus.className = "form-status error"
+    formStatus.textContent = "Erro ao enviar mensagem. Tente novamente mais tarde."
+    formStatus.classList.remove("hidden")
+    showToast("Erro ao enviar mensagem", "error")
+  }
 
-  notificationList.innerHTML = allNotifications
-    .map(
-      (notif) => `
-    <div class="notification-item ${notif.unread ? "unread" : ""}">
-      <div class="notification-icon">${notif.icon}</div>
-      <div class="notification-content">
-        <h4>${notif.title}</h4>
-        <p>${notif.message}</p>
-        <span class="notification-time">${notif.time}</span>
-      </div>
-    </div>
-  `,
-    )
-    .join("")
+  submitBtn.disabled = false
+  submitBtn.innerHTML = `
+    <span>Enviar Mensagem</span>
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="22" y1="2" x2="11" y2="13"></line>
+      <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+    </svg>
+  `
+
+  setTimeout(() => {
+    formStatus.classList.add("hidden")
+  }, 5000)
+}
+
+// ==================== COPIAR SCRIPT ====================
+function copyScript() {
+  const scriptText = document.getElementById("flickScript").textContent
+  navigator.clipboard
+    .writeText(scriptText)
+    .then(() => {
+      showToast("Script copiado para a área de transferência!", "success")
+      const copyBtn = document.getElementById("copyScriptBtn")
+      copyBtn.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+      Copiado!
+    `
+      setTimeout(() => {
+        copyBtn.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+        </svg>
+        Copiar Script
+      `
+      }, 2000)
+    })
+    .catch(() => {
+      showToast("Erro ao copiar script", "error")
+    })
 }
 
 // ==================== TOAST NOTIFICATIONS ====================
-function showToast(message, type = "success") {
+function showToast(message, type = "info") {
   const container = document.getElementById("toastContainer")
-
   const toast = document.createElement("div")
-  toast.className = `toast ${type}`
-  toast.textContent = message
+  toast.className = `toast toast-${type}`
+
+  const icons = {
+    success: "✓",
+    error: "✕",
+    info: "ℹ",
+  }
+
+  toast.innerHTML = `
+    <span class="toast-icon">${icons[type] || icons.info}</span>
+    <span class="toast-message">${message}</span>
+  `
 
   container.appendChild(toast)
 
+  // Trigger animation
+  setTimeout(() => toast.classList.add("show"), 10)
+
+  // Remove toast
   setTimeout(() => {
-    toast.remove()
+    toast.classList.remove("show")
+    setTimeout(() => toast.remove(), 300)
   }, 3000)
 }
 
-// ==================== ANO ATUAL ====================
+// ==================== UPDATE YEAR ====================
 function updateYear() {
   document.getElementById("currentYear").textContent = new Date().getFullYear()
 }
 
-// ==================== TECLAS DE ATALHO ====================
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") {
-    document.querySelectorAll(".modal-overlay").forEach((m) => m.classList.add("hidden"))
-    closePanels()
-  }
-})
+// Make functions globally available
+window.copyScript = copyScript
+window.banUserByIP = banUserByIP
+window.unbanIP = unbanIP
