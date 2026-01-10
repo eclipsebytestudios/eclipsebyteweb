@@ -1,13 +1,17 @@
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
 body{background:#000;color:#fff}
-.navbar{position:fixed;top:0;width:100%;display:flex;justify-content:space-between;padding:10px;background:#000;border-bottom:1px solid #222}
-.nav-logo{height:40px}
+.navbar{position:fixed;top:0;width:100%;display:flex;justify-content:space-between;
+padding:10px;border-bottom:1px solid #222;background:#000}
+.nav-left{display:flex;align-items:center;gap:10px}
+.nav-left img{height:40px}
 .nav-links li{display:inline;margin:0 10px;cursor:pointer}
-.page{display:none;min-height:100vh;padding:100px 20px;text-align:center}
+.page{display:none;min-height:100vh;padding:120px 20px;text-align:center}
 .page.active{display:block}
-.home-logo{width:200px;margin-bottom:20px}
-.cards{display:flex;gap:20px;justify-content:center;flex-wrap:wrap}
-.card{border:1px solid #fff;padding:20px;width:200px}
-pre{background:#111;padding:15px}
+.logo-big{width:220px;margin-bottom:20px}
+.cards{display:flex;justify-content:center;gap:20px}
+.cards div{border:1px solid #fff;padding:20px;width:150px}
+pre{background:#111;padding:15px;margin:20px auto;max-width:600px}
+button{background:#000;color:#fff;border:1px solid #fff;padding:10px;margin-top:10px;cursor:pointer}
+a{color:#fff;display:block;margin:10px}
 footer{text-align:center;padding:20px;border-top:1px solid #222}
-a{display:block;color:#fff;margin:10px}
+.legal{margin-top:20px;font-size:14px;color:#aaa}
