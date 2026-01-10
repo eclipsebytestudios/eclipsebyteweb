@@ -1,399 +1,309 @@
-let currentUser = null
-let notifications = []
-let isSignUp = false
-const reservedUsernames = new Set()
-const DISCORD_WEBHOOK =
-  "https://discord.com/api/webhooks/1459229422220611584/hOdCqWKLZnGiEsbIJCJw6jQtjrAxZuGBwydgwTQ_PVwx7Ki9vpzKTIDoSkwwVCMGH3co"
-
-document.addEventListener("DOMContentLoaded", () => {
-  loadUserData()
-  initNavigation()
-  initAuth()
-  initSettings()
-  initNotifications()
-  initContact()
-  initCopyScript()
-  updateUI()
-})
-
-function loadUserData() {
-  const saved = localStorage.getItem("currentUser")
-  if (saved) {
-    currentUser = JSON.parse(saved)
-    addNotification("Bem-vindo de volta!", `Olá, ${currentUser.username}!`)
-  }
-  const savedNotifs = localStorage.getItem("notifications")
-  if (savedNotifs) {
-    notifications = JSON.parse(savedNotifs)
-  }
-  const savedReserved = localStorage.getItem("reservedUsernames")
-  if (savedReserved) {
-    JSON.parse(savedReserved).forEach((name) => reservedUsernames.add(name))
-  }
-}
-
-function saveUserData() {
-  if (currentUser) {
-    localStorage.setItem("currentUser", JSON.stringify(currentUser))
-  } else {
-    localStorage.removeItem("currentUser")
-  }
-  localStorage.setItem("notifications", JSON.stringify(notifications))
-  localStorage.setItem("reservedUsernames", JSON.stringify([...reservedUsernames]))
-}
-
-function initNavigation() {
-  const links = document.querySelectorAll(".nav-link")
-  const tabs = document.querySelectorAll(".tab-content")
-
-  links.forEach((link) => {
-    link.addEventListener("click", (e) => {
-      e.preventDefault()
-      const tab = link.getAttribute("data-tab")
-
-      links.forEach((l) => l.classList.remove("active"))
-      link.classList.add("active")
-
-      tabs.forEach((t) => t.classList.remove("active"))
-      document.getElementById(tab).classList.add("active")
-    })
-  })
-}
-
-function initAuth() {
-  const authBtn = document.getElementById("authBtn")
-  const authModal = document.getElementById("authModal")
-  const closeAuthModal = document.getElementById("closeAuthModal")
-  const authForm = document.getElementById("authForm")
-  const switchMode = document.getElementById("switchMode")
-  const overlay = authModal.querySelector(".modal-overlay")
-
-  authBtn.addEventListener("click", () => {
-    if (currentUser) {
-      showSettings()
-    } else {
-      authModal.classList.add("active")
-    }
-  })
-
-  closeAuthModal.addEventListener("click", () => authModal.classList.remove("active"))
-  overlay.addEventListener("click", () => authModal.classList.remove("active"))
-
-  switchMode.addEventListener("click", (e) => {
-    e.preventDefault()
-    isSignUp = !isSignUp
-    document.getElementById("authTitle").textContent = isSignUp ? "Sign Up" : "Sign In"
-    document.getElementById("switchText").textContent = isSignUp ? "Já tem uma conta?" : "Não tem uma conta?"
-    switchMode.textContent = isSignUp ? "Fazer login" : "Criar conta"
-  })
-
-  authForm.addEventListener("submit", (e) => {
-    e.preventDefault()
-    const username = document.getElementById("authUsername").value.trim()
-    const email = document.getElementById("authEmail").value.trim()
-    const password = document.getElementById("authPassword").value
-
-    if (isSignUp) {
-      if (localStorage.getItem(`user_${username}`)) {
-        showToast("Nome de usuário já existe!")
-        return
-      }
-
-      const normalizedUsername = username.toLowerCase()
-      if (normalizedUsername !== "silva777only" && reservedUsernames.has(normalizedUsername)) {
-        showToast("Este nome de usuário está reservado!")
-        return
-      }
-
-      reservedUsernames.add(normalizedUsername)
-
-      currentUser = {
-        username,
-        email,
-        password,
-        bio: "",
-        profilePic: "",
-        banner: "",
-        createdAt: Date.now(),
-      }
-
-      localStorage.setItem(`user_${username}`, JSON.stringify(currentUser))
-      saveUserData()
-      authModal.classList.remove("active")
-      authForm.reset()
-      showToast(`Conta criada! Bem-vindo, ${username}!`)
-      addNotification("Conta criada", "Sua conta foi criada com sucesso!")
-      updateUI()
-    } else {
-      const savedUser = localStorage.getItem(`user_${username}`)
-      if (savedUser) {
-        const user = JSON.parse(savedUser)
-        if (user.password === password) {
-          currentUser = user
-          saveUserData()
-          authModal.classList.remove("active")
-          authForm.reset()
-          showToast(`Bem-vindo de volta, ${username}!`)
-          addNotification("Login realizado", "Você entrou na sua conta")
-          updateUI()
-        } else {
-          showToast("Senha incorreta!")
-        }
-      } else {
-        showToast("Usuário não encontrado!")
-      }
-    }
-  })
-}
-
-function initSettings() {
-  const settingsBtn = document.getElementById("settingsBtn")
-  const settingsModal = document.getElementById("settingsModal")
-  const closeSettings = document.getElementById("closeSettingsModal")
-  const saveSettings = document.getElementById("saveSettings")
-  const logoutBtn = document.getElementById("logoutBtn")
-  const profilePicInput = document.getElementById("profilePicInput")
-  const bannerInput = document.getElementById("bannerInput")
-  const overlay = settingsModal.querySelector(".modal-overlay")
-
-  settingsBtn.addEventListener("click", showSettings)
-  closeSettings.addEventListener("click", () => settingsModal.classList.remove("active"))
-  overlay.addEventListener("click", () => settingsModal.classList.remove("active"))
-
-  profilePicInput.addEventListener("change", (e) => {
-    const file = e.target.files[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onload = (event) => {
-        document.getElementById("profilePicture").style.backgroundImage = `url(${event.target.result})`
-      }
-      reader.readAsDataURL(file)
-    }
-  })
-
-  bannerInput.addEventListener("change", (e) => {
-    const file = e.target.files[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onload = (event) => {
-        document.getElementById("profileBanner").style.backgroundImage = `url(${event.target.result})`
-      }
-      reader.readAsDataURL(file)
-    }
-  })
-
-  saveSettings.addEventListener("click", () => {
-    if (currentUser) {
-      currentUser.bio = document.getElementById("bioInput").value
-
-      const profilePic = document.getElementById("profilePicture").style.backgroundImage
-      if (profilePic && profilePic !== "none") {
-        currentUser.profilePic = profilePic
-      }
-
-      const banner = document.getElementById("profileBanner").style.backgroundImage
-      if (banner && banner !== "none") {
-        currentUser.banner = banner
-      }
-
-      localStorage.setItem(`user_${currentUser.username}`, JSON.stringify(currentUser))
-      saveUserData()
-      showToast("Configurações salvas!")
-      addNotification("Perfil atualizado", "Suas alterações foram salvas")
-    }
-  })
-
-  logoutBtn.addEventListener("click", () => {
-    currentUser = null
-    saveUserData()
-    settingsModal.classList.remove("active")
-    updateUI()
-    showToast("Logout realizado!")
-  })
-}
-
-function showSettings() {
-  if (!currentUser) {
-    showToast("Faça login para acessar as configurações")
-    return
-  }
-
-  const settingsModal = document.getElementById("settingsModal")
-  document.getElementById("usernameDisplay").textContent = currentUser.username
-  document.getElementById("bioInput").value = currentUser.bio || ""
-
-  if (currentUser.profilePic) {
-    document.getElementById("profilePicture").style.backgroundImage = currentUser.profilePic
-  }
-
-  if (currentUser.banner) {
-    document.getElementById("profileBanner").style.backgroundImage = currentUser.banner
-  }
-
-  const badgesDisplay = document.getElementById("badgesDisplay")
-  badgesDisplay.innerHTML = ""
-
-  if (currentUser.username.toLowerCase() === "silva777only") {
-    badgesDisplay.innerHTML = `
-            <span class="badge special">👑 Owner</span>
-            <span class="badge special">💎 Desenvolvedor</span>
-            <span class="badge special">⭐ Assinante VIP</span>
-        `
-  } else {
-    badgesDisplay.innerHTML = '<span class="badge">👤 Membro</span>'
-  }
-
-  settingsModal.classList.add("active")
-}
-
-function initNotifications() {
-  const notifBtn = document.getElementById("notifBtn")
-  const notifModal = document.getElementById("notifModal")
-  const closeNotif = document.getElementById("closeNotifModal")
-  const clearNotif = document.getElementById("clearNotif")
-  const overlay = notifModal.querySelector(".modal-overlay")
-
-  notifBtn.addEventListener("click", () => {
-    updateNotifList()
-    notifModal.classList.add("active")
-  })
-
-  closeNotif.addEventListener("click", () => notifModal.classList.remove("active"))
-  overlay.addEventListener("click", () => notifModal.classList.remove("active"))
-
-  clearNotif.addEventListener("click", () => {
-    notifications = []
-    saveUserData()
-    updateNotifList()
-    updateNotifBadge()
-    showToast("Notificações limpas!")
-  })
-
-  addNotification("Nova atualização do site", "Confira as novidades!")
-  addNotification("Novo script em breve", "Fique atento às atualizações")
-  addNotification("Bem-vindo ao EclipseByte Web", "Explore todas as funcionalidades")
-}
-
-function updateNotifList() {
-  const list = document.getElementById("notifList")
-
-  if (notifications.length === 0) {
-    list.innerHTML = '<p class="empty-notif">Nenhuma notificação</p>'
-  } else {
-    list.innerHTML = notifications
-      .map(
-        (notif) => `
-            <div class="notif-item">
-                <h4>${notif.title}</h4>
-                <p>${notif.message}</p>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EclipseByte Studios</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-left">
+                <img src="https://i.ibb.co/hFcgn43/image-removebg-preview.png" alt="EclipseByte Logo" class="nav-logo">
+                <span class="nav-brand">EclipseByte Studios</span>
             </div>
-        `,
-      )
-      .join("")
-  }
-}
+            <ul class="nav-menu">
+                <li><a href="#" class="nav-link active" data-tab="home">Home</a></li>
+                <li><a href="#" class="nav-link" data-tab="studios">EclipseByte Studios</a></li>
+                <li><a href="#" class="nav-link" data-tab="exploits">EclipseXPloits</a></li>
+                <li><a href="#" class="nav-link" data-tab="links">Links</a></li>
+                <li><a href="#" class="nav-link" data-tab="contact">Contato</a></li>
+            </ul>
+            <div class="nav-right">
+                <button class="icon-btn" id="notifBtn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                    </svg>
+                    <span class="notif-badge" id="notifBadge">0</span>
+                </button>
+                <button class="icon-btn" id="settingsBtn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M12 1v6m0 6v6m7.071-13.071L16.95 9.05M9.05 14.95l-3.121 3.121M23 12h-6m-6 0H1m18.071 7.071L16.95 14.95M9.05 9.05L5.929 5.929"/>
+                    </svg>
+                </button>
+                <button class="btn-primary" id="authBtn">Sign In / Sign Up</button>
+            </div>
+        </div>
+    </nav>
 
-function addNotification(title, message) {
-  notifications.unshift({ title, message, time: Date.now() })
-  if (notifications.length > 50) {
-    notifications = notifications.slice(0, 50)
-  }
-  saveUserData()
-  updateNotifBadge()
-}
+    <main class="main-content">
+        <section class="tab-content active" id="home">
+            <div class="hero">
+                <img src="https://i.ibb.co/hFcgn43/image-removebg-preview.png" alt="EclipseByte Logo" class="hero-logo">
+                <h1 class="hero-title">EclipseByte Studios</h1>
+                <p class="hero-description">Desenvolvendo jogos incríveis e ferramentas inovadoras para a comunidade</p>
+                <p class="disclaimer">Não possuímos qualquer parceria, afiliação ou vínculo com a Roblox Corporation.</p>
+            </div>
+        </section>
 
-function updateNotifBadge() {
-  document.getElementById("notifBadge").textContent = notifications.length
-}
+        <section class="tab-content" id="studios">
+            <div class="section-header">
+                <h2>EclipseByte Studios</h2>
+                <p>Estúdio de desenvolvimento de jogos Roblox</p>
+            </div>
+            
+            <div class="info-section">
+                <h3>Missão</h3>
+                <p>Criar experiências únicas e envolventes para jogadores de todo o mundo</p>
+            </div>
+            
+            <div class="info-section">
+                <h3>Visão</h3>
+                <p>Ser reconhecido como um dos principais estúdios independentes de desenvolvimento de jogos</p>
+            </div>
+            
+            <div class="info-section">
+                <h3>Valores</h3>
+                <p>Inovação, qualidade, comunidade e transparência</p>
+            </div>
 
-function initContact() {
-  const form = document.getElementById("contactForm")
+            <div class="games-section">
+                <h3>Nossos Jogos</h3>
+                
+                <div class="game-card">
+                    <img src="https://tr.rbxcdn.com/180DAY-4e84040c993120a665ce7a8c1a1e2faf/256/256/Image/Webp/noFilter" alt="Havana Roleplay" class="game-thumbnail">
+                    <div class="game-info">
+                        <h4>Havana Roleplay</h4>
+                        <a href="https://www.roblox.com/pt/games/72358924525153/Havana-Roleplay" target="_blank" class="game-link">Jogar Agora</a>
+                    </div>
+                </div>
+                
+                <div class="game-card dev">
+                    <div class="game-info">
+                        <h4>Last Owner</h4>
+                        <span class="status-badge">Em Desenvolvimento</span>
+                    </div>
+                </div>
+                
+                <div class="game-card dev">
+                    <div class="game-info">
+                        <h4>Exército Brasileiro</h4>
+                        <span class="status-badge">Em Desenvolvimento</span>
+                    </div>
+                </div>
+            </div>
+            
+            <p class="disclaimer">EclipseByte Studios não é afiliado à Roblox Corporation.</p>
+        </section>
 
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault()
+        <section class="tab-content" id="exploits">
+            <div class="section-header">
+                <h2>EclipseXPloits</h2>
+                <p>Scripts e ferramentas para Roblox</p>
+            </div>
+            
+            <p class="disclaimer-large">EclipseXPloits não possui qualquer parceria, afiliação ou vínculo com a Roblox Corporation.</p>
+            
+            <div class="script-section">
+                <h3>Script para Flick</h3>
+                <a href="https://www.roblox.com/pt/games/136801880565837/Flick" target="_blank" class="game-link">Link do Jogo</a>
+                
+                <div class="code-block">
+                    <code id="scriptCode">loadstring(game:HttpGet("https://pastebin.com/raw/bFgPjC9F"))()</code>
+                    <button class="copy-btn" id="copyScriptBtn">Copiar Script</button>
+                </div>
+            </div>
+        </section>
 
-    const data = {
-      firstName: document.getElementById("firstName").value,
-      lastName: document.getElementById("lastName").value,
-      email: document.getElementById("email").value,
-      subject: document.getElementById("subject").value,
-      sector: document.getElementById("sector").value,
-      reason: document.getElementById("reason").value,
-      contactMethod: document.getElementById("contactMethod").value,
-      contactInfo: document.getElementById("contactInfo").value,
-      message: document.getElementById("message").value,
-    }
+        <section class="tab-content" id="links">
+            <div class="section-header">
+                <h2>Links</h2>
+                <p>Nos encontre em outras plataformas</p>
+            </div>
+            
+            <div class="links-grid">
+                <a href="https://linktr.ee/silva777only" target="_blank" class="link-card">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M7.953 15.066c-.08.163-.08.324-.08.486.08.517.528.897 1.052.89h1.294v4.776c0 .486-.404.882-.89.882H6.577a.898.898 0 0 1-.889-.882v-4.776H.992c-.728 0-1.214-.729-.89-1.377l6.96-12.627a1.065 1.065 0 0 1 1.863 0l2.913 5.288-3.885 7.34zm15.945 0-6.96-12.627a1.065 1.065 0 0 0-1.862 0l-2.995 5.449 3.885 7.178c.08.163.08.324.08.486-.08.517-.529.897-1.052.89h-1.296v4.776c0 .486.404.882.89.882h2.914a.9.9 0 0 0 .892-.882v-4.776h4.695c.728 0 1.214-.729.89-1.377z"/>
+                    </svg>
+                    <span>Linktree do Criador</span>
+                </a>
+                
+                <a href="https://portfoliosilva.github.io/portfoliosilva/" target="_blank" class="link-card">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M20 3H4c-1.103 0-2 .897-2 2v14c0 1.103.897 2 2 2h16c1.103 0 2-.897 2-2V5c0-1.103-.897-2-2-2zM4 19V7h16l.002 12H4z"/>
+                        <path d="M9.293 9.293 5.586 13l3.707 3.707 1.414-1.414L8.414 13l2.293-2.293zm5.414 0-1.414 1.414L15.586 13l-2.293 2.293 1.414 1.414L18.414 13z"/>
+                    </svg>
+                    <span>Portfólio do Criador</span>
+                </a>
+                
+                <a href="https://discord.gg/44JNZkrtpy" target="_blank" class="link-card">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
+                    </svg>
+                    <span>Discord EclipseByte</span>
+                </a>
+            </div>
+        </section>
 
-    try {
-      await fetch(DISCORD_WEBHOOK, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          embeds: [
-            {
-              title: "📩 Nova Mensagem de Contato",
-              color: 16777215,
-              fields: [
-                { name: "Nome", value: `${data.firstName} ${data.lastName}`, inline: true },
-                { name: "Email", value: data.email, inline: true },
-                { name: "Assunto", value: data.subject },
-                { name: "Setor", value: data.sector, inline: true },
-                { name: "Motivo", value: data.reason, inline: true },
-                { name: "Meio de Contato", value: `${data.contactMethod}: ${data.contactInfo}` },
-                { name: "Mensagem", value: data.message },
-              ],
-              timestamp: new Date().toISOString(),
-            },
-          ],
-        }),
-      })
+        <section class="tab-content" id="contact">
+            <div class="section-header">
+                <h2>Contato</h2>
+                <p>Entre em contato conosco</p>
+            </div>
+            
+            <form class="contact-form" id="contactForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Nome</label>
+                        <input type="text" id="firstName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Sobrenome</label>
+                        <input type="text" id="lastName" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Assunto</label>
+                    <input type="text" id="subject" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Setor do Contato</label>
+                    <select id="sector" required>
+                        <option value="">Selecione...</option>
+                        <option value="EclipseByte Studios">EclipseByte Studios</option>
+                        <option value="EclipseXPloits">EclipseXPloits</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Motivo do Contato</label>
+                    <select id="reason" required>
+                        <option value="">Selecione...</option>
+                        <option value="Parceria">Parceria</option>
+                        <option value="Suporte técnico">Suporte técnico</option>
+                        <option value="Reportar bug">Reportar bug</option>
+                        <option value="Sugestão">Sugestão</option>
+                        <option value="Recrutamento">Recrutamento</option>
+                        <option value="Dúvida geral">Dúvida geral</option>
+                        <option value="Remoção de conteúdo">Remoção de conteúdo</option>
+                        <option value="Outro">Outro</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Meio de Contato Preferido</label>
+                    <select id="contactMethod" required>
+                        <option value="">Selecione...</option>
+                        <option value="Email">Email</option>
+                        <option value="Número">Número</option>
+                        <option value="Discord">Discord</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Seu Contato</label>
+                    <input type="text" id="contactInfo" required placeholder="Digite seu email, número ou Discord">
+                </div>
+                
+                <div class="form-group">
+                    <label>Descrição da Mensagem</label>
+                    <textarea id="message" required rows="5"></textarea>
+                </div>
+                
+                <button type="submit" class="btn-submit">Enviar Mensagem</button>
+            </form>
+        </section>
+    </main>
 
-      showToast("Mensagem enviada com sucesso!")
-      addNotification("Mensagem enviada", "Entraremos em contato em breve")
-      form.reset()
-    } catch (error) {
-      showToast("Erro ao enviar mensagem. Tente novamente.")
-      console.error("Erro:", error)
-    }
-  })
-}
+    <footer class="footer">
+        <p class="footer-disclaimer">EclipseByte Studios e EclipseXPloits não possuem qualquer vínculo com a Roblox Corporation.</p>
+        <p class="footer-copyright">© EclipseByte Studios – Todos os direitos reservados</p>
+    </footer>
 
-function initCopyScript() {
-  const copyBtn = document.getElementById("copyScriptBtn")
-  const scriptCode = document.getElementById("scriptCode")
+    <div class="modal" id="authModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <button class="modal-close" id="closeAuthModal">&times;</button>
+            <h2 id="authTitle">Sign In</h2>
+            <form id="authForm">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="authUsername" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="authEmail" required>
+                </div>
+                <div class="form-group">
+                    <label>Senha</label>
+                    <input type="password" id="authPassword" required>
+                </div>
+                <button type="submit" class="btn-submit">Entrar</button>
+            </form>
+            <p class="modal-switch">
+                <span id="switchText">Não tem uma conta?</span>
+                <a href="#" id="switchMode">Criar conta</a>
+            </p>
+        </div>
+    </div>
 
-  copyBtn.addEventListener("click", () => {
-    const text = scriptCode.textContent
-    navigator.clipboard
-      .writeText(text)
-      .then(() => {
-        showToast("Script copiado!")
-        copyBtn.textContent = "Copiado!"
-        setTimeout(() => {
-          copyBtn.textContent = "Copiar Script"
-        }, 2000)
-      })
-      .catch(() => {
-        showToast("Erro ao copiar script")
-      })
-  })
-}
+    <div class="modal" id="settingsModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content settings-modal">
+            <button class="modal-close" id="closeSettingsModal">&times;</button>
+            <h2>Configurações do Perfil</h2>
+            <div class="profile-header" id="profileHeader">
+                <div class="profile-banner" id="profileBanner"></div>
+                <div class="profile-picture" id="profilePicture"></div>
+            </div>
+            <div class="settings-content">
+                <h3 id="usernameDisplay">Username</h3>
+                <div id="badgesDisplay" class="badges"></div>
+                
+                <div class="form-group">
+                    <label>Foto de Perfil</label>
+                    <input type="file" id="profilePicInput" accept="image/*">
+                </div>
+                
+                <div class="form-group">
+                    <label>Banner</label>
+                    <input type="file" id="bannerInput" accept="image/*">
+                </div>
+                
+                <div class="form-group">
+                    <label>Bio</label>
+                    <textarea id="bioInput" rows="3"></textarea>
+                </div>
+                
+                <button class="btn-submit" id="saveSettings">Salvar Alterações</button>
+                <button class="btn-logout" id="logoutBtn">Sair da Conta</button>
+            </div>
+        </div>
+    </div>
 
-function showToast(message) {
-  const toast = document.getElementById("toast")
-  toast.textContent = message
-  toast.classList.add("show")
-  setTimeout(() => {
-    toast.classList.remove("show")
-  }, 3000)
-}
+    <div class="modal" id="notifModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <button class="modal-close" id="closeNotifModal">&times;</button>
+            <h2>Notificações</h2>
+            <div class="notif-list" id="notifList"></div>
+            <button class="btn-clear" id="clearNotif">Limpar Todas</button>
+        </div>
+    </div>
 
-function updateUI() {
-  const authBtn = document.getElementById("authBtn")
-  if (currentUser) {
-    authBtn.textContent = currentUser.username
-  } else {
-    authBtn.textContent = "Sign In / Sign Up"
-  }
-  updateNotifBadge()
-}
+    <div class="toast" id="toast"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
