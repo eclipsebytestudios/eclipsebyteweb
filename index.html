@@ -1,58 +1,71 @@
+<!-- =========================
+     index.html
+     EclipseByte Studios
+     ========================= -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>EclipseByte Studios</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EclipseByte Studios</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<nav class="navbar">
+<!-- NAVBAR -->
+<nav id="navbar">
   <div class="nav-left">
-    <img src="https://i.ibb.co/hFcgn43s/image-removebg-preview.png">
+    <img src="https://i.ibb.co/hFcgn43s/image-removebg-preview.png" class="nav-logo">
     <span>EclipseByte Studios</span>
   </div>
-  <ul class="nav-links">
-    <li data-page="home">Home</li>
-    <li data-page="studio">Studios</li>
-    <li data-page="xploits">EclipseXPloits</li>
-    <li data-page="links">Links</li>
-    <li data-page="contato">Contato</li>
+  <ul id="navbarMenu">
+    <li class="nav-link active" data-page="home">Home</li>
+    <li class="nav-link" data-page="studio">Studios</li>
+    <li class="nav-link" data-page="xploits">EclipseXPloits</li>
+    <li class="nav-link" data-page="links">Links</li>
+    <li class="nav-link" data-page="contato">Contato</li>
   </ul>
   <div class="nav-right">
-    <button id="notifBtn">🔔</button>
+    <button id="notificationBtn">🔔</button>
     <button id="settingsBtn">⚙️</button>
-    <button id="authBtn">Sign In</button>
+    <div id="authButtons">
+      <button id="signinBtn">Sign In</button>
+      <button id="signupBtn">Sign Up</button>
+    </div>
+    <div id="profileMenu" class="hidden">
+      <img id="navAvatar">
+      <span id="navUsername"></span>
+    </div>
   </div>
 </nav>
 
+<!-- PAGES -->
 <main>
 <section id="home" class="page active">
   <img class="logo-big" src="https://i.ibb.co/hFcgn43s/image-removebg-preview.png">
-  <h1>Inovação. Criatividade. Excelência.</h1>
-  <p>EclipseByte Studios desenvolvendo projetos modernos e profissionais.</p>
-  <div class="legal">Não possuímos qualquer vínculo com a Roblox Corporation.</div>
+  <h1>Inovação • Código • Segurança</h1>
+  <p>EclipseByte Studios — projetos modernos e profissionais.</p>
+  <p class="legal">Não possuímos qualquer vínculo com a Roblox Corporation.</p>
 </section>
 
 <section id="studio" class="page">
   <h1>EclipseByte Studios</h1>
-  <p>Estúdio independente focado em tecnologia.</p>
+  <p>Estúdio independente focado em tecnologia, scripts e experiências digitais.</p>
   <div class="cards">
     <div>Missão</div>
     <div>Visão</div>
     <div>Valores</div>
   </div>
-  <div class="legal">EclipseByte Studios não é afiliado à Roblox Corporation.</div>
+  <p class="legal">EclipseByte Studios não é afiliado à Roblox Corporation.</p>
 </section>
 
 <section id="xploits" class="page">
   <h1>EclipseXPloits</h1>
-  <p>Projeto educacional de scripts.</p>
+  <p>Projeto educacional e experimental.</p>
   <a href="https://www.roblox.com/pt/games/136801880565837/Flick" target="_blank">Jogo Flick</a>
   <pre id="scriptBox">loadstring(game:HttpGet("https://pastebin.com/raw/bFgPjC9F"))()</pre>
-  <button onclick="copyScript()">Copiar Script</button>
-  <div class="legal">Sem vínculo com a Roblox Corporation.</div>
+  <button class="copy-btn" data-script='loadstring(game:HttpGet("https://pastebin.com/raw/bFgPjC9F"))()'><span>Copiar Script</span></button>
+  <p class="legal">EclipseXPloits não possui vínculo com a Roblox Corporation.</p>
 </section>
 
 <section id="links" class="page">
@@ -60,34 +73,106 @@
   <a href="https://portfoliosilva.github.io/portfoliosilva/" target="_blank">Portfólio</a>
   <a href="https://discord.gg/44JNZkrtpy" target="_blank">Discord</a>
   <a href="https://www.roblox.com/pt/communities/35815072/EclipseByte-Studios#!/about" target="_blank">Grupo Roblox</a>
-  <a href="https://www.roblox.com/pt/catalog/127179564039370/EclipseByte-Studios" target="_blank">Camisa</a>
+  <a href="https://www.roblox.com/pt/catalog/127179564039370/EclipseByte-Studios" target="_blank">Camisa Oficial</a>
 </section>
 
 <section id="contato" class="page">
 <form id="contactForm">
-<input placeholder="Nome" required>
-<input placeholder="Sobrenome" required>
-<input type="email" placeholder="Email" required>
-<input placeholder="Assunto" required>
-<textarea placeholder="Mensagem" required></textarea>
-<select required>
-<option value="">Motivo</option>
-<option>Parceria</option><option>Suporte</option><option>Bug</option>
-<option>Sugestão</option><option>DMCA</option><option>Dúvida</option><option>Outro</option>
+<input id="firstName" placeholder="Nome" required>
+<input id="lastName" placeholder="Sobrenome" required>
+<input id="email" type="email" placeholder="Email" required>
+<input id="subject" placeholder="Assunto" required>
+<textarea id="message" placeholder="Mensagem" required></textarea>
+<select id="contactMethod" required>
+<option value="">Meio de contato</option>
+<option value="email">Email</option>
+<option value="phone">Telefone</option>
+<option value="discord">Discord</option>
 </select>
-<select required>
+<input id="contactInfo" placeholder="Contato escolhido" required>
+<select id="reason" required>
+<option value="">Motivo</option>
+<option value="partnership">Parceria</option>
+<option value="support">Suporte técnico</option>
+<option value="bug">Reportar bug</option>
+<option value="suggestion">Sugestão</option>
+<option value="dmca">DMCA</option>
+<option value="question">Dúvida</option>
+<option value="other">Outro</option>
+</select>
+<select id="sector" required>
 <option value="">Setor</option>
 <option>EclipseByte Studios</option>
 <option>EclipseXPloits</option>
 </select>
-<button>Enviar</button>
+<button id="submitBtn">Enviar</button>
+<div id="formStatus" class="form-status hidden"></div>
 </form>
+</section>
+
+<section id="profile" class="page">
+  <div id="profileBanner"></div>
+  <img id="profileImg">
+  <h2 id="profileUsername"></h2>
+  <p id="profileBio"></p>
+  <p id="profileMemberSince"></p>
+  <div id="profileBadges"></div>
 </section>
 </main>
 
+<!-- PANELS -->
+<div id="panelOverlay" class="hidden"></div>
+
+<div id="notificationPanel" class="side-panel hidden">
+  <button id="closeNotifications">X</button>
+  <div id="notificationList"></div>
+</div>
+
+<div id="settingsPanel" class="side-panel hidden">
+  <button id="closeSettings">X</button>
+  <form id="settingsForm">
+    <img id="settingsAvatar">
+    <input type="file" id="changeAvatar">
+    <div id="bannerPreview"></div>
+    <input type="file" id="changeBanner">
+    <textarea id="editBio" placeholder="Editar bio"></textarea>
+    <div id="settingsBadges"></div>
+    <button>Salvar</button>
+    <button type="button" id="logoutBtn">Logout</button>
+  </form>
+</div>
+
+<!-- MODALS -->
+<div id="signinModal" class="modal-overlay hidden">
+<form id="signinForm" class="modal">
+<input id="signinUsername" placeholder="Username ou Email" required>
+<input id="signinPassword" type="password" placeholder="Senha" required>
+<button>Entrar</button>
+<a href="#" id="switchToSignup">Criar conta</a>
+<button type="button" id="closeSignin">X</button>
+</form>
+</div>
+
+<div id="signupModal" class="modal-overlay hidden">
+<form id="signupForm" class="modal">
+<input id="signupUsername" placeholder="Username" required>
+<input id="signupEmail" type="email" placeholder="Email" required>
+<input id="signupPassword" type="password" placeholder="Senha" required>
+<textarea id="signupBio" placeholder="Bio"></textarea>
+<input type="file" id="signupAvatar">
+<div id="avatarPreview" class="hidden"><img id="avatarPreviewImg"></div>
+<button>Criar Conta</button>
+<a href="#" id="switchToSignin">Já tenho conta</a>
+<button type="button" id="closeSignup">X</button>
+</form>
+</div>
+
+<div id="toastContainer"></div>
+
 <footer>
-© EclipseByte Studios – Todos os direitos reservados<br>
-Créditos: silva777only & zTh3us
+© <span id="currentYear"></span> EclipseByte Studios — Todos os direitos reservados<br>
+Créditos: silva777only & zTh3us<br>
+EclipseByte Studios e EclipseXPloits não possuem vínculo com a Roblox Corporation.
 </footer>
 
 <script src="script.js"></script>
