@@ -1,17 +1,32 @@
+/* =========================
+   style.css
+   ========================= */
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
 body{background:#000;color:#fff}
-.navbar{position:fixed;top:0;width:100%;display:flex;justify-content:space-between;
-padding:10px;border-bottom:1px solid #222;background:#000}
-.nav-left{display:flex;align-items:center;gap:10px}
-.nav-left img{height:40px}
-.nav-links li{display:inline;margin:0 10px;cursor:pointer}
+a{color:#fff;text-decoration:none;display:block;margin:10px}
+nav{position:fixed;top:0;width:100%;display:flex;justify-content:space-between;
+align-items:center;padding:10px;border-bottom:1px solid #222;background:#000;z-index:10}
+.nav-logo{height:40px}
+ul{list-style:none;display:flex;gap:15px}
+li{cursor:pointer}
+.nav-right button{margin-left:5px}
 .page{display:none;min-height:100vh;padding:120px 20px;text-align:center}
-.page.active{display:block}
+.page.active{display:block;animation:fade .4s}
 .logo-big{width:220px;margin-bottom:20px}
-.cards{display:flex;justify-content:center;gap:20px}
+.cards{display:flex;justify-content:center;gap:20px;margin:20px}
 .cards div{border:1px solid #fff;padding:20px;width:150px}
-pre{background:#111;padding:15px;margin:20px auto;max-width:600px}
-button{background:#000;color:#fff;border:1px solid #fff;padding:10px;margin-top:10px;cursor:pointer}
-a{color:#fff;display:block;margin:10px}
+pre{background:#111;padding:15px;margin:20px auto;max-width:600px;overflow:auto}
+button{background:#000;color:#fff;border:1px solid #fff;padding:10px;cursor:pointer}
+input,textarea,select{width:100%;margin:5px 0;padding:10px;background:#000;color:#fff;border:1px solid #444}
 footer{text-align:center;padding:20px;border-top:1px solid #222}
-.legal{margin-top:20px;font-size:14px;color:#aaa}
+.hidden{display:none}
+.legal{color:#aaa;font-size:14px;margin-top:20px}
+.side-panel{position:fixed;right:0;top:0;width:300px;height:100%;background:#000;border-left:1px solid #222;padding:10px;z-index:20}
+#panelOverlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);z-index:15}
+.modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);display:flex;justify-content:center;align-items:center}
+.modal{background:#000;border:1px solid #fff;padding:20px;width:300px}
+#profileBanner{height:200px;background:#111}
+#profileImg{width:120px;border-radius:50%;margin-top:-60px;border:3px solid #000}
+.badge{border:1px solid #fff;padding:5px;margin:5px;display:inline-block;font-size:12px}
+.toast{position:fixed;bottom:20px;right:20px;background:#111;padding:10px;border:1px solid #fff;animation:fade .3s}
+@keyframes fade{from{opacity:0}to{opacity:1}}
