@@ -1,6 +1,4 @@
-/* ═══════════════════════════════════════════════════════════════
-   RESET E VARIÁVEIS GLOBAIS
-   ═══════════════════════════════════════════════════════════════ */
+/* Reset e Variáveis */
 * {
   margin: 0;
   padding: 0;
@@ -23,9 +21,7 @@ body {
   overflow-x: hidden;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   NAVBAR
-   ═══════════════════════════════════════════════════════════════ */
+/* Navbar */
 .navbar {
   position: fixed;
   top: 0;
@@ -123,9 +119,7 @@ body {
   opacity: 0.8;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   MAIN CONTENT
-   ═══════════════════════════════════════════════════════════════ */
+/* Main Content */
 .main-content {
   margin-top: 80px;
   min-height: calc(100vh - 180px);
@@ -152,9 +146,7 @@ body {
   }
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   HOME / HERO SECTION
-   ═══════════════════════════════════════════════════════════════ */
+/* Hero Section */
 .hero-section {
   max-width: 800px;
   margin: 0 auto;
@@ -195,13 +187,7 @@ body {
   text-align: center;
 }
 
-.legal-notice strong {
-  color: var(--color-text);
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   CONTENT SECTIONS
-   ═══════════════════════════════════════════════════════════════ */
+/* Content Sections */
 .content-section {
   max-width: 900px;
   margin: 0 auto;
@@ -225,7 +211,6 @@ body {
 .info-card h2 {
   font-size: 1.8rem;
   margin-bottom: 1rem;
-  color: var(--color-text);
 }
 
 .info-card p {
@@ -245,13 +230,7 @@ body {
   color: #cccccc;
 }
 
-.info-card ul li strong {
-  color: var(--color-text);
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   SCRIPT SHOWCASE
-   ═══════════════════════════════════════════════════════════════ */
+/* Script Showcase */
 .script-showcase {
   margin-top: 3rem;
 }
@@ -276,10 +255,6 @@ body {
   margin-bottom: 1.5rem;
 }
 
-.script-header h3 {
-  font-size: 1.5rem;
-}
-
 .script-status {
   background-color: #00ff00;
   color: var(--color-bg);
@@ -289,13 +264,8 @@ body {
   font-weight: 600;
 }
 
-.script-info {
-  margin-bottom: 1.5rem;
-}
-
 .script-info p {
   margin-bottom: 0.5rem;
-  font-size: 1.1rem;
 }
 
 .script-info a {
@@ -308,7 +278,6 @@ body {
   border: 1px solid var(--color-border);
   border-radius: 6px;
   padding: 1rem;
-  position: relative;
 }
 
 .script-code {
@@ -336,9 +305,7 @@ body {
   opacity: 0.8;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   LINKS PAGE
-   ═══════════════════════════════════════════════════════════════ */
+/* Links */
 .links-container {
   display: grid;
   gap: 2rem;
@@ -364,10 +331,6 @@ body {
   transform: translateY(-5px);
 }
 
-.link-card svg {
-  flex-shrink: 0;
-}
-
 .link-card h3 {
   font-size: 1.5rem;
   margin-bottom: 0.5rem;
@@ -377,9 +340,7 @@ body {
   color: var(--color-gray);
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   CONTACT FORM
-   ═══════════════════════════════════════════════════════════════ */
+/* Contact Form */
 .contact-form {
   max-width: 600px;
   margin: 0 auto;
@@ -460,9 +421,7 @@ body {
   display: block;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   MODAL
-   ═══════════════════════════════════════════════════════════════ */
+/* Modal */
 .modal {
   display: none;
   position: fixed;
@@ -503,10 +462,6 @@ body {
   align-items: center;
 }
 
-.modal-header h2 {
-  font-size: 1.5rem;
-}
-
 .close-btn {
   background: none;
   border: none;
@@ -525,9 +480,7 @@ body {
   padding: 2rem;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   AUTH FORMS
-   ═══════════════════════════════════════════════════════════════ */
+/* Auth Forms */
 .auth-form {
   display: flex;
   flex-direction: column;
@@ -542,12 +495,6 @@ body {
   border-radius: 6px;
   color: var(--color-text);
   font-size: 1rem;
-}
-
-.auth-form input:focus,
-.auth-form textarea:focus {
-  outline: none;
-  border-color: var(--color-text);
 }
 
 .file-input-label {
@@ -583,9 +530,7 @@ body {
   display: none !important;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   PROFILE
-   ═══════════════════════════════════════════════════════════════ */
+/* Profile */
 .profile-view {
   position: relative;
 }
@@ -615,11 +560,6 @@ body {
   object-fit: cover;
 }
 
-.profile-info h2 {
-  font-size: 2rem;
-  margin-bottom: 1rem;
-}
-
 .profile-badges {
   display: flex;
   justify-content: center;
@@ -634,9 +574,6 @@ body {
   padding: 0.4rem 0.8rem;
   border-radius: 6px;
   font-size: 0.9rem;
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
 }
 
 .badge.developer {
@@ -649,11 +586,6 @@ body {
   color: #ff0000;
 }
 
-.badge.vip {
-  border-color: #ffd700;
-  color: #ffd700;
-}
-
 .profile-member-since {
   color: var(--color-gray);
   margin-bottom: 1rem;
@@ -664,9 +596,7 @@ body {
   line-height: 1.6;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   SETTINGS
-   ═══════════════════════════════════════════════════════════════ */
+/* Settings */
 .profile-settings {
   display: flex;
   flex-direction: column;
@@ -677,10 +607,6 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-}
-
-.setting-group label {
-  font-weight: 600;
 }
 
 .setting-group input[type="file"] {
@@ -698,18 +624,10 @@ body {
   border: 1px solid var(--color-border);
   border-radius: 6px;
   color: var(--color-text);
-  font-size: 1rem;
   resize: vertical;
 }
 
-.setting-group textarea:focus {
-  outline: none;
-  border-color: var(--color-text);
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   NOTIFICATIONS PANEL
-   ═══════════════════════════════════════════════════════════════ */
+/* Notifications */
 .notifications-panel {
   position: fixed;
   top: 80px;
@@ -738,10 +656,6 @@ body {
   align-items: center;
 }
 
-.panel-header h3 {
-  font-size: 1.2rem;
-}
-
 .panel-content {
   padding: 1rem;
   overflow-y: auto;
@@ -758,7 +672,6 @@ body {
 
 .notification-item h4 {
   margin-bottom: 0.5rem;
-  font-size: 1rem;
 }
 
 .notification-item p {
@@ -771,9 +684,7 @@ body {
   font-size: 0.8rem;
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   FOOTER
-   ═══════════════════════════════════════════════════════════════ */
+/* Footer */
 .footer {
   background-color: var(--color-bg);
   border-top: 1px solid var(--color-border);
@@ -798,43 +709,25 @@ body {
   color: var(--color-gray);
 }
 
-/* ═══════════════════════════════════════════════════════════════
-   RESPONSIVE
-   ═══════════════════════════════════════════════════════════════ */
-@media (max-width: 1024px) {
-  .navbar-center {
-    gap: 1rem;
-  }
-
-  .navbar-title {
-    display: none;
-  }
-}
-
+/* Responsive */
 @media (max-width: 768px) {
   .navbar {
     padding: 1rem;
   }
 
   .navbar-container {
-    gap: 1rem;
+    flex-wrap: wrap;
   }
 
   .navbar-center {
-    display: none;
-    position: fixed;
-    top: 70px;
-    left: 0;
-    right: 0;
-    background-color: var(--color-bg);
-    border-bottom: 1px solid var(--color-border);
-    flex-direction: column;
-    padding: 1rem;
+    order: 3;
+    width: 100%;
+    justify-content: space-around;
     gap: 0.5rem;
   }
 
-  .navbar-center.mobile-active {
-    display: flex;
+  .nav-link {
+    font-size: 0.9rem;
   }
 
   .hero-logo {
@@ -842,14 +735,6 @@ body {
   }
 
   .hero-title {
-    font-size: 2rem;
-  }
-
-  .hero-subtitle {
-    font-size: 1.1rem;
-  }
-
-  .content-section h1 {
     font-size: 2rem;
   }
 
@@ -862,34 +747,8 @@ body {
     right: -100%;
   }
 
-  .notifications-panel.active {
-    right: 20px;
-  }
-
   .link-card {
     flex-direction: column;
     text-align: center;
-  }
-}
-
-@media (max-width: 480px) {
-  .main-content {
-    padding: 1rem;
-  }
-
-  .hero-section {
-    padding: 2rem 1rem;
-  }
-
-  .content-section {
-    padding: 1rem;
-  }
-
-  .modal {
-    padding: 1rem;
-  }
-
-  .modal-body {
-    padding: 1rem;
   }
 }
