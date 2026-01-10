@@ -1,36 +1,37 @@
-// Estado da aplicação
 let currentUser = null
 let notifications = []
-let isLoginMode = true
+let isSignUp = false
+const reservedUsernames = new Set()
+const DISCORD_WEBHOOK =
+  "https://discord.com/api/webhooks/1459229422220611584/hOdCqWKLZnGiEsbIJCJw6jQtjrAxZuGBwydgwTQ_PVwx7Ki9vpzKTIDoSkwwVCMGH3co"
 
-// Webhook Discord (substitua pela sua URL)
-const DISCORD_WEBHOOK = "YOUR_DISCORD_WEBHOOK_URL_HERE"
-
-// Inicialização
 document.addEventListener("DOMContentLoaded", () => {
   loadUserData()
   initNavigation()
   initAuth()
-  initModals()
-  initContactForm()
+  initSettings()
+  initNotifications()
+  initContact()
+  initCopyScript()
   updateUI()
 })
 
-// Carregar dados do usuário
 function loadUserData() {
-  const savedUser = localStorage.getItem("currentUser")
-  if (savedUser) {
-    currentUser = JSON.parse(savedUser)
+  const saved = localStorage.getItem("currentUser")
+  if (saved) {
+    currentUser = JSON.parse(saved)
     addNotification("Bem-vindo de volta!", `Olá, ${currentUser.username}!`)
   }
-
-  const savedNotifications = localStorage.getItem("notifications")
-  if (savedNotifications) {
-    notifications = JSON.parse(savedNotifications)
+  const savedNotifs = localStorage.getItem("notifications")
+  if (savedNotifs) {
+    notifications = JSON.parse(savedNotifs)
+  }
+  const savedReserved = localStorage.getItem("reservedUsernames")
+  if (savedReserved) {
+    JSON.parse(savedReserved).forEach((name) => reservedUsernames.add(name))
   }
 }
 
-// Salvar dados do usuário
 function saveUserData() {
   if (currentUser) {
     localStorage.setItem("currentUser", JSON.stringify(currentUser))
@@ -38,342 +39,361 @@ function saveUserData() {
     localStorage.removeItem("currentUser")
   }
   localStorage.setItem("notifications", JSON.stringify(notifications))
+  localStorage.setItem("reservedUsernames", JSON.stringify([...reservedUsernames]))
 }
 
-// Navegação entre abas
 function initNavigation() {
-  const navLinks = document.querySelectorAll(".nav-link")
+  const links = document.querySelectorAll(".nav-link")
   const tabs = document.querySelectorAll(".tab-content")
 
-  navLinks.forEach((link) => {
+  links.forEach((link) => {
     link.addEventListener("click", (e) => {
       e.preventDefault()
-      const tabId = link.getAttribute("data-tab")
+      const tab = link.getAttribute("data-tab")
 
-      // Atualizar links ativos
-      navLinks.forEach((l) => l.classList.remove("active"))
+      links.forEach((l) => l.classList.remove("active"))
       link.classList.add("active")
 
-      // Atualizar tabs ativos
-      tabs.forEach((tab) => tab.classList.remove("active"))
-      document.getElementById(`${tabId}-tab`).classList.add("active")
+      tabs.forEach((t) => t.classList.remove("active"))
+      document.getElementById(tab).classList.add("active")
     })
   })
 }
 
-// Sistema de autenticação
 function initAuth() {
   const authBtn = document.getElementById("authBtn")
   const authModal = document.getElementById("authModal")
   const closeAuthModal = document.getElementById("closeAuthModal")
   const authForm = document.getElementById("authForm")
-  const authSwitch = document.getElementById("authSwitch")
+  const switchMode = document.getElementById("switchMode")
+  const overlay = authModal.querySelector(".modal-overlay")
 
   authBtn.addEventListener("click", () => {
     if (currentUser) {
-      // Se estiver logado, fazer logout
-      currentUser = null
-      saveUserData()
-      updateUI()
-      showToast("Logout realizado com sucesso!")
+      showSettings()
     } else {
-      // Se não estiver logado, abrir modal
       authModal.classList.add("active")
     }
   })
 
-  closeAuthModal.addEventListener("click", () => {
-    authModal.classList.remove("active")
-  })
+  closeAuthModal.addEventListener("click", () => authModal.classList.remove("active"))
+  overlay.addEventListener("click", () => authModal.classList.remove("active"))
 
-  authModal.addEventListener("click", (e) => {
-    if (e.target === authModal) {
-      authModal.classList.remove("active")
-    }
+  switchMode.addEventListener("click", (e) => {
+    e.preventDefault()
+    isSignUp = !isSignUp
+    document.getElementById("authTitle").textContent = isSignUp ? "Sign Up" : "Sign In"
+    document.getElementById("switchText").textContent = isSignUp ? "Já tem uma conta?" : "Não tem uma conta?"
+    switchMode.textContent = isSignUp ? "Fazer login" : "Criar conta"
   })
 
   authForm.addEventListener("submit", (e) => {
     e.preventDefault()
-    const username = document.getElementById("authUsername").value
+    const username = document.getElementById("authUsername").value.trim()
+    const email = document.getElementById("authEmail").value.trim()
     const password = document.getElementById("authPassword").value
 
-    if (isLoginMode) {
-      // Login
-      const users = JSON.parse(localStorage.getItem("users") || "{}")
-      if (users[username] && users[username] === password) {
-        currentUser = {
-          username,
-          bio: localStorage.getItem(`bio_${username}`) || "",
-          createdAt: Date.now(),
-        }
-        saveUserData()
-        authModal.classList.remove("active")
-        updateUI()
-        showToast(`Bem-vindo, ${username}!`)
-        addNotification("Login realizado", "Você entrou na sua conta")
-        authForm.reset()
-      } else {
-        showToast("Usuário ou senha incorretos!")
+    if (isSignUp) {
+      if (localStorage.getItem(`user_${username}`)) {
+        showToast("Nome de usuário já existe!")
+        return
       }
-    } else {
-      // Registro
-      const users = JSON.parse(localStorage.getItem("users") || "{}")
-      if (users[username]) {
-        showToast("Usuário já existe!")
-      } else {
-        users[username] = password
-        localStorage.setItem("users", JSON.stringify(users))
-        currentUser = {
-          username,
-          bio: "",
-          createdAt: Date.now(),
-        }
-        saveUserData()
-        authModal.classList.remove("active")
-        updateUI()
-        showToast(`Conta criada! Bem-vindo, ${username}!`)
-        addNotification("Conta criada", "Sua conta foi criada com sucesso")
-        authForm.reset()
+
+      const normalizedUsername = username.toLowerCase()
+      if (normalizedUsername !== "silva777only" && reservedUsernames.has(normalizedUsername)) {
+        showToast("Este nome de usuário está reservado!")
+        return
       }
-    }
-  })
 
-  authSwitch.addEventListener("click", (e) => {
-    e.preventDefault()
-    isLoginMode = !isLoginMode
-    updateAuthModal()
-  })
-}
+      reservedUsernames.add(normalizedUsername)
 
-function updateAuthModal() {
-  const title = document.getElementById("authModalTitle")
-  const switchText = document.getElementById("authSwitchText")
-  const switchLink = document.getElementById("authSwitch")
+      currentUser = {
+        username,
+        email,
+        password,
+        bio: "",
+        profilePic: "",
+        banner: "",
+        createdAt: Date.now(),
+      }
 
-  if (isLoginMode) {
-    title.textContent = "Entrar"
-    switchText.textContent = "Não tem uma conta?"
-    switchLink.textContent = "Criar conta"
-  } else {
-    title.textContent = "Criar Conta"
-    switchText.textContent = "Já tem uma conta?"
-    switchLink.textContent = "Entrar"
-  }
-}
-
-// Modais de perfil e notificações
-function initModals() {
-  // Profile Modal
-  const profileBtn = document.getElementById("profileBtn")
-  const profileModal = document.getElementById("profileModal")
-  const closeProfileModal = document.getElementById("closeProfileModal")
-  const saveProfile = document.getElementById("saveProfile")
-  const logoutBtn = document.getElementById("logoutBtn")
-
-  profileBtn.addEventListener("click", () => {
-    if (currentUser) {
-      updateProfileModal()
-      profileModal.classList.add("active")
-    } else {
-      showToast("Faça login para acessar o perfil")
-    }
-  })
-
-  closeProfileModal.addEventListener("click", () => {
-    profileModal.classList.remove("active")
-  })
-
-  profileModal.addEventListener("click", (e) => {
-    if (e.target === profileModal) {
-      profileModal.classList.remove("active")
-    }
-  })
-
-  saveProfile.addEventListener("click", () => {
-    if (currentUser) {
-      const bio = document.getElementById("profileBio").value
-      currentUser.bio = bio
-      localStorage.setItem(`bio_${currentUser.username}`, bio)
+      localStorage.setItem(`user_${username}`, JSON.stringify(currentUser))
       saveUserData()
-      showToast("Perfil atualizado com sucesso!")
-      profileModal.classList.remove("active")
+      authModal.classList.remove("active")
+      authForm.reset()
+      showToast(`Conta criada! Bem-vindo, ${username}!`)
+      addNotification("Conta criada", "Sua conta foi criada com sucesso!")
+      updateUI()
+    } else {
+      const savedUser = localStorage.getItem(`user_${username}`)
+      if (savedUser) {
+        const user = JSON.parse(savedUser)
+        if (user.password === password) {
+          currentUser = user
+          saveUserData()
+          authModal.classList.remove("active")
+          authForm.reset()
+          showToast(`Bem-vindo de volta, ${username}!`)
+          addNotification("Login realizado", "Você entrou na sua conta")
+          updateUI()
+        } else {
+          showToast("Senha incorreta!")
+        }
+      } else {
+        showToast("Usuário não encontrado!")
+      }
+    }
+  })
+}
+
+function initSettings() {
+  const settingsBtn = document.getElementById("settingsBtn")
+  const settingsModal = document.getElementById("settingsModal")
+  const closeSettings = document.getElementById("closeSettingsModal")
+  const saveSettings = document.getElementById("saveSettings")
+  const logoutBtn = document.getElementById("logoutBtn")
+  const profilePicInput = document.getElementById("profilePicInput")
+  const bannerInput = document.getElementById("bannerInput")
+  const overlay = settingsModal.querySelector(".modal-overlay")
+
+  settingsBtn.addEventListener("click", showSettings)
+  closeSettings.addEventListener("click", () => settingsModal.classList.remove("active"))
+  overlay.addEventListener("click", () => settingsModal.classList.remove("active"))
+
+  profilePicInput.addEventListener("change", (e) => {
+    const file = e.target.files[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        document.getElementById("profilePicture").style.backgroundImage = `url(${event.target.result})`
+      }
+      reader.readAsDataURL(file)
+    }
+  })
+
+  bannerInput.addEventListener("change", (e) => {
+    const file = e.target.files[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onload = (event) => {
+        document.getElementById("profileBanner").style.backgroundImage = `url(${event.target.result})`
+      }
+      reader.readAsDataURL(file)
+    }
+  })
+
+  saveSettings.addEventListener("click", () => {
+    if (currentUser) {
+      currentUser.bio = document.getElementById("bioInput").value
+
+      const profilePic = document.getElementById("profilePicture").style.backgroundImage
+      if (profilePic && profilePic !== "none") {
+        currentUser.profilePic = profilePic
+      }
+
+      const banner = document.getElementById("profileBanner").style.backgroundImage
+      if (banner && banner !== "none") {
+        currentUser.banner = banner
+      }
+
+      localStorage.setItem(`user_${currentUser.username}`, JSON.stringify(currentUser))
+      saveUserData()
+      showToast("Configurações salvas!")
+      addNotification("Perfil atualizado", "Suas alterações foram salvas")
     }
   })
 
   logoutBtn.addEventListener("click", () => {
     currentUser = null
     saveUserData()
-    profileModal.classList.remove("active")
+    settingsModal.classList.remove("active")
     updateUI()
-    showToast("Logout realizado com sucesso!")
+    showToast("Logout realizado!")
   })
+}
 
-  // Notifications Modal
+function showSettings() {
+  if (!currentUser) {
+    showToast("Faça login para acessar as configurações")
+    return
+  }
+
+  const settingsModal = document.getElementById("settingsModal")
+  document.getElementById("usernameDisplay").textContent = currentUser.username
+  document.getElementById("bioInput").value = currentUser.bio || ""
+
+  if (currentUser.profilePic) {
+    document.getElementById("profilePicture").style.backgroundImage = currentUser.profilePic
+  }
+
+  if (currentUser.banner) {
+    document.getElementById("profileBanner").style.backgroundImage = currentUser.banner
+  }
+
+  const badgesDisplay = document.getElementById("badgesDisplay")
+  badgesDisplay.innerHTML = ""
+
+  if (currentUser.username.toLowerCase() === "silva777only") {
+    badgesDisplay.innerHTML = `
+            <span class="badge special">👑 Owner</span>
+            <span class="badge special">💎 Desenvolvedor</span>
+            <span class="badge special">⭐ Assinante VIP</span>
+        `
+  } else {
+    badgesDisplay.innerHTML = '<span class="badge">👤 Membro</span>'
+  }
+
+  settingsModal.classList.add("active")
+}
+
+function initNotifications() {
   const notifBtn = document.getElementById("notifBtn")
   const notifModal = document.getElementById("notifModal")
-  const closeNotifModal = document.getElementById("closeNotifModal")
+  const closeNotif = document.getElementById("closeNotifModal")
   const clearNotif = document.getElementById("clearNotif")
+  const overlay = notifModal.querySelector(".modal-overlay")
 
   notifBtn.addEventListener("click", () => {
-    updateNotificationsModal()
+    updateNotifList()
     notifModal.classList.add("active")
   })
 
-  closeNotifModal.addEventListener("click", () => {
-    notifModal.classList.remove("active")
-  })
-
-  notifModal.addEventListener("click", (e) => {
-    if (e.target === notifModal) {
-      notifModal.classList.remove("active")
-    }
-  })
+  closeNotif.addEventListener("click", () => notifModal.classList.remove("active"))
+  overlay.addEventListener("click", () => notifModal.classList.remove("active"))
 
   clearNotif.addEventListener("click", () => {
     notifications = []
     saveUserData()
-    updateNotificationsModal()
-    updateNotificationBadge()
+    updateNotifList()
+    updateNotifBadge()
     showToast("Notificações limpas!")
   })
+
+  addNotification("Nova atualização do site", "Confira as novidades!")
+  addNotification("Novo script em breve", "Fique atento às atualizações")
+  addNotification("Bem-vindo ao EclipseByte Web", "Explore todas as funcionalidades")
 }
 
-function updateProfileModal() {
-  const username = document.getElementById("profileUsername")
-  const badges = document.getElementById("profileBadges")
-  const bio = document.getElementById("profileBio")
-
-  username.textContent = currentUser.username
-  bio.value = currentUser.bio || ""
-
-  // Limpar badges
-  badges.innerHTML = ""
-
-  // Adicionar badges especiais para silva777only
-  if (currentUser.username.toLowerCase() === "silva777only") {
-    const specialBadges = [
-      { text: "👑 Fundador", special: true },
-      { text: "⭐ VIP", special: true },
-      { text: "🛡️ Admin", special: true },
-    ]
-    specialBadges.forEach((badge) => {
-      const badgeEl = document.createElement("span")
-      badgeEl.className = badge.special ? "badge special" : "badge"
-      badgeEl.textContent = badge.text
-      badges.appendChild(badgeEl)
-    })
-  } else {
-    const defaultBadge = document.createElement("span")
-    defaultBadge.className = "badge"
-    defaultBadge.textContent = "👤 Membro"
-    badges.appendChild(defaultBadge)
-  }
-}
-
-function updateNotificationsModal() {
-  const notifList = document.getElementById("notifList")
+function updateNotifList() {
+  const list = document.getElementById("notifList")
 
   if (notifications.length === 0) {
-    notifList.innerHTML = '<p class="empty-state">Nenhuma notificação</p>'
+    list.innerHTML = '<p class="empty-notif">Nenhuma notificação</p>'
   } else {
-    notifList.innerHTML = ""
-    notifications.forEach((notif) => {
-      const item = document.createElement("div")
-      item.className = "notif-item"
-      item.innerHTML = `
+    list.innerHTML = notifications
+      .map(
+        (notif) => `
+            <div class="notif-item">
                 <h4>${notif.title}</h4>
                 <p>${notif.message}</p>
-            `
-      notifList.appendChild(item)
-    })
+            </div>
+        `,
+      )
+      .join("")
   }
 }
 
-// Formulário de contato
-function initContactForm() {
-  const contactForm = document.getElementById("contactForm")
+function addNotification(title, message) {
+  notifications.unshift({ title, message, time: Date.now() })
+  if (notifications.length > 50) {
+    notifications = notifications.slice(0, 50)
+  }
+  saveUserData()
+  updateNotifBadge()
+}
 
-  contactForm.addEventListener("submit", async (e) => {
+function updateNotifBadge() {
+  document.getElementById("notifBadge").textContent = notifications.length
+}
+
+function initContact() {
+  const form = document.getElementById("contactForm")
+
+  form.addEventListener("submit", async (e) => {
     e.preventDefault()
 
-    const name = document.getElementById("name").value
-    const email = document.getElementById("email").value
-    const message = document.getElementById("message").value
-
-    // Enviar para Discord (se webhook configurado)
-    if (DISCORD_WEBHOOK && DISCORD_WEBHOOK !== "YOUR_DISCORD_WEBHOOK_URL_HERE") {
-      try {
-        await fetch(DISCORD_WEBHOOK, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            embeds: [
-              {
-                title: "📨 Nova Mensagem de Contato",
-                fields: [
-                  { name: "Nome", value: name, inline: true },
-                  { name: "Email", value: email, inline: true },
-                  { name: "Mensagem", value: message },
-                ],
-                color: 16777215,
-                timestamp: new Date().toISOString(),
-              },
-            ],
-          }),
-        })
-        showToast("Mensagem enviada com sucesso!")
-        addNotification("Mensagem enviada", "Entraremos em contato em breve")
-      } catch (error) {
-        console.error("Erro ao enviar mensagem:", error)
-        showToast("Erro ao enviar mensagem. Tente novamente.")
-      }
-    } else {
-      // Simular envio se webhook não configurado
-      showToast("Mensagem enviada com sucesso!")
-      addNotification("Mensagem enviada", "Entraremos em contato em breve")
+    const data = {
+      firstName: document.getElementById("firstName").value,
+      lastName: document.getElementById("lastName").value,
+      email: document.getElementById("email").value,
+      subject: document.getElementById("subject").value,
+      sector: document.getElementById("sector").value,
+      reason: document.getElementById("reason").value,
+      contactMethod: document.getElementById("contactMethod").value,
+      contactInfo: document.getElementById("contactInfo").value,
+      message: document.getElementById("message").value,
     }
 
-    contactForm.reset()
+    try {
+      await fetch(DISCORD_WEBHOOK, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          embeds: [
+            {
+              title: "📩 Nova Mensagem de Contato",
+              color: 16777215,
+              fields: [
+                { name: "Nome", value: `${data.firstName} ${data.lastName}`, inline: true },
+                { name: "Email", value: data.email, inline: true },
+                { name: "Assunto", value: data.subject },
+                { name: "Setor", value: data.sector, inline: true },
+                { name: "Motivo", value: data.reason, inline: true },
+                { name: "Meio de Contato", value: `${data.contactMethod}: ${data.contactInfo}` },
+                { name: "Mensagem", value: data.message },
+              ],
+              timestamp: new Date().toISOString(),
+            },
+          ],
+        }),
+      })
+
+      showToast("Mensagem enviada com sucesso!")
+      addNotification("Mensagem enviada", "Entraremos em contato em breve")
+      form.reset()
+    } catch (error) {
+      showToast("Erro ao enviar mensagem. Tente novamente.")
+      console.error("Erro:", error)
+    }
   })
 }
 
-// Sistema de notificações
-function addNotification(title, message) {
-  notifications.unshift({ title, message, timestamp: Date.now() })
-  if (notifications.length > 20) {
-    notifications = notifications.slice(0, 20)
-  }
-  saveUserData()
-  updateNotificationBadge()
+function initCopyScript() {
+  const copyBtn = document.getElementById("copyScriptBtn")
+  const scriptCode = document.getElementById("scriptCode")
+
+  copyBtn.addEventListener("click", () => {
+    const text = scriptCode.textContent
+    navigator.clipboard
+      .writeText(text)
+      .then(() => {
+        showToast("Script copiado!")
+        copyBtn.textContent = "Copiado!"
+        setTimeout(() => {
+          copyBtn.textContent = "Copiar Script"
+        }, 2000)
+      })
+      .catch(() => {
+        showToast("Erro ao copiar script")
+      })
+  })
 }
 
-function updateNotificationBadge() {
-  const badge = document.getElementById("notifBadge")
-  badge.textContent = notifications.length
-}
-
-// Toast
 function showToast(message) {
   const toast = document.getElementById("toast")
   toast.textContent = message
   toast.classList.add("show")
-
   setTimeout(() => {
     toast.classList.remove("show")
   }, 3000)
 }
 
-// Atualizar UI
 function updateUI() {
   const authBtn = document.getElementById("authBtn")
-
   if (currentUser) {
-    authBtn.textContent = "Sair"
+    authBtn.textContent = currentUser.username
   } else {
-    authBtn.textContent = "Entrar"
+    authBtn.textContent = "Sign In / Sign Up"
   }
-
-  updateNotificationBadge()
+  updateNotifBadge()
 }
