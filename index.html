@@ -3,538 +3,359 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="EclipseByte Studios - Desenvolvimento de projetos e scripts">
-    <meta name="theme-color" content="#000000">
     <title>EclipseByte Studios</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- ==================== NAVBAR ==================== -->
-    <nav class="navbar" id="navbar">
+    <!-- Navbar fixa -->
+    <nav class="navbar">
         <div class="navbar-container">
-            <!-- Logo e Nome -->
-            <div class="navbar-brand">
-                <img src="https://i.ibb.co/hFcgn43s/image-removebg-preview.png" alt="EclipseByte Logo" class="navbar-logo">
+            <div class="navbar-left">
+                <img src="https://i.ibb.co/hFcgn43s/image-removebg-preview.png" alt="EclipseByte Studios Logo" class="navbar-logo">
                 <span class="navbar-title">EclipseByte Studios</span>
             </div>
-
-            <!-- Menu de Navegação -->
-            <ul class="navbar-menu" id="navbarMenu">
-                <li><a href="#home" class="nav-link active" data-page="home">Home</a></li>
-                <li><a href="#studio" class="nav-link" data-page="studio">EclipseByte Studios</a></li>
-                <li><a href="#xploits" class="nav-link" data-page="xploits">EclipseXPloits</a></li>
-                <li><a href="#links" class="nav-link" data-page="links">Links</a></li>
-                <li><a href="#contato" class="nav-link" data-page="contato">Contato</a></li>
-            </ul>
-
-            <!-- Botões da Direita -->
-            <div class="navbar-actions">
-                <!-- Notificações -->
-                <button class="icon-btn" id="notificationBtn" title="Notificações">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <div class="navbar-center">
+                <a href="#home" class="nav-link active" data-tab="home">Home</a>
+                <a href="#studios" class="nav-link" data-tab="studios">EclipseByte Studios</a>
+                <a href="#exploits" class="nav-link" data-tab="exploits">EclipseXPloits</a>
+                <a href="#links" class="nav-link" data-tab="links">Links</a>
+                <a href="#contato" class="nav-link" data-tab="contato">Contato</a>
+            </div>
+            <div class="navbar-right">
+                <button class="icon-btn" id="notificationsBtn" title="Notificações">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
                         <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
                     </svg>
-                    <span class="notification-badge">3</span>
                 </button>
-
-                <!-- Configurações -->
                 <button class="icon-btn" id="settingsBtn" title="Configurações">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="12" cy="12" r="3"></circle>
-                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                        <path d="M12 1v6m0 6v6m5.66-14.66l-4.24 4.24m-2.83 2.83l-4.24 4.24M23 12h-6m-6 0H5m14.66 5.66l-4.24-4.24m-2.83-2.83l-4.24-4.24"></path>
                     </svg>
                 </button>
-
-                <!-- Autenticação -->
-                <div class="auth-buttons" id="authButtons">
-                    <button class="btn btn-outline" id="signinBtn">Sign In</button>
-                    <button class="btn btn-primary" id="signupBtn">Sign Up</button>
-                </div>
-
-                <!-- Perfil (quando logado) -->
-                <div class="profile-menu hidden" id="profileMenu">
-                    <button class="profile-btn" id="profileBtn">
-                        <img src="/placeholder.svg" alt="Avatar" class="profile-avatar" id="navAvatar">
-                        <span id="navUsername"></span>
-                    </button>
-                </div>
-
-                <!-- Menu Mobile -->
-                <button class="mobile-menu-btn" id="mobileMenuBtn">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </button>
+                <button class="btn-auth" id="authBtn">Sign In / Sign Up</button>
             </div>
         </div>
     </nav>
 
-    <!-- ==================== MAIN CONTENT ==================== -->
+    <!-- Painel de Notificações -->
+    <div class="notifications-panel" id="notificationsPanel">
+        <div class="panel-header">
+            <h3>Notificações</h3>
+            <button class="close-btn" id="closeNotifications">&times;</button>
+        </div>
+        <div class="panel-content" id="notificationsList">
+            <!-- Notificações serão inseridas via JavaScript -->
+        </div>
+    </div>
+
+    <!-- Modal de Configurações -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Configurações do Perfil</h2>
+                <button class="close-btn" id="closeSettings">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="profile-settings">
+                    <div class="setting-group">
+                        <label>Foto de Perfil</label>
+                        <input type="file" id="profilePicInput" accept="image/*">
+                    </div>
+                    <div class="setting-group">
+                        <label>Banner</label>
+                        <input type="file" id="bannerInput" accept="image/*">
+                    </div>
+                    <div class="setting-group">
+                        <label>Bio</label>
+                        <textarea id="bioInput" rows="4" placeholder="Conte sobre você..."></textarea>
+                    </div>
+                    <button class="btn-primary" id="saveSettingsBtn">Salvar Alterações</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Auth -->
+    <div class="modal" id="authModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="authModalTitle">Entrar</h2>
+                <button class="close-btn" id="closeAuth">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Sign In Form -->
+                <form class="auth-form" id="signInForm">
+                    <input type="text" id="signInUsername" placeholder="Username ou Email" required>
+                    <input type="password" id="signInPassword" placeholder="Senha" required>
+                    <button type="submit" class="btn-primary">Entrar</button>
+                    <p class="auth-switch">Não tem uma conta? <a href="#" id="switchToSignUp">Criar conta</a></p>
+                </form>
+
+                <!-- Sign Up Form -->
+                <form class="auth-form hidden" id="signUpForm">
+                    <input type="text" id="signUpUsername" placeholder="Username" required>
+                    <input type="email" id="signUpEmail" placeholder="Email" required>
+                    <input type="password" id="signUpPassword" placeholder="Senha" required>
+                    <input type="password" id="signUpConfirmPassword" placeholder="Confirmar Senha" required>
+                    <label class="file-input-label">
+                        Foto de Perfil (opcional)
+                        <input type="file" id="signUpProfilePic" accept="image/*">
+                    </label>
+                    <textarea id="signUpBio" placeholder="Bio (opcional)" rows="3"></textarea>
+                    <button type="submit" class="btn-primary">Criar Conta</button>
+                    <p class="auth-switch">Já tem uma conta? <a href="#" id="switchToSignIn">Entrar</a></p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Perfil -->
+    <div class="modal" id="profileModal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2>Perfil</h2>
+                <button class="close-btn" id="closeProfile">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="profile-view">
+                    <div class="profile-banner" id="profileBanner"></div>
+                    <div class="profile-info">
+                        <img id="profileAvatar" class="profile-avatar" src="/placeholder.svg" alt="Avatar">
+                        <h2 id="profileUsername"></h2>
+                        <div class="profile-badges" id="profileBadges"></div>
+                        <p class="profile-member-since">Membro desde: Agosto 2025</p>
+                        <p class="profile-bio" id="profileBio"></p>
+                        <button class="btn-primary" id="logoutBtn">Sair</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Conteúdo Principal -->
     <main class="main-content">
-        <!-- ========== HOME PAGE ========== -->
-        <section class="page active" id="home">
-            <div class="container">
-                <div class="home-content">
-                    <img src="https://i.ibb.co/hFcgn43s/image-removebg-preview.png" alt="EclipseByte Studios Logo" class="home-logo animate-float">
-                    <h1 class="home-title animate-fade-up">EclipseByte Studios</h1>
-                    <p class="home-tagline animate-fade-up delay-1">Inovação. Criatividade. Excelência.</p>
-                    <p class="home-description animate-fade-up delay-2">
-                        Somos um estúdio dedicado ao desenvolvimento de projetos criativos e inovadores. 
-                        Nossa missão é criar experiências únicas através de soluções tecnológicas de alta qualidade.
+        <!-- ABA 1: Home -->
+        <section class="tab-content active" id="home">
+            <div class="hero-section">
+                <img src="https://i.ibb.co/hFcgn43s/image-removebg-preview.png" alt="EclipseByte Studios Logo" class="hero-logo">
+                <h1 class="hero-title">Bem-vindo ao EclipseByte Studios</h1>
+                <p class="hero-subtitle">Desenvolvimento de alta qualidade e inovação tecnológica</p>
+                <p class="hero-description">
+                    EclipseByte Studios é um estúdio de desenvolvimento focado em criar soluções tecnológicas
+                    inovadoras, projetos criativos e ferramentas que transformam ideias em realidade.
+                </p>
+                <div class="legal-notice">
+                    <strong>Aviso Legal:</strong> Não possuímos qualquer parceria, afiliação ou vínculo com a Roblox Corporation.
+                </div>
+            </div>
+        </section>
+
+        <!-- ABA 2: EclipseByte Studios -->
+        <section class="tab-content" id="studios">
+            <div class="content-section">
+                <h1>EclipseByte Studios</h1>
+                <div class="info-card">
+                    <h2>Sobre Nós</h2>
+                    <p>
+                        EclipseByte Studios é um estúdio independente de desenvolvimento dedicado à criação
+                        de projetos tecnológicos inovadores. Combinamos expertise técnica com criatividade
+                        para desenvolver soluções que atendem às necessidades da comunidade.
                     </p>
-                    <div class="legal-notice animate-fade-up delay-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <line x1="12" y1="16" x2="12" y2="12"></line>
-                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </div>
+
+                <div class="info-card">
+                    <h2>Nossa Missão</h2>
+                    <p>
+                        Desenvolver ferramentas e projetos de alta qualidade que empoderem usuários e
+                        criadores, mantendo sempre os mais altos padrões de excelência técnica e ética
+                        profissional.
+                    </p>
+                </div>
+
+                <div class="info-card">
+                    <h2>Nossa Visão</h2>
+                    <p>
+                        Ser reconhecido como um estúdio referência em inovação tecnológica, criando
+                        soluções que fazem a diferença na experiência dos usuários e estabelecendo novos
+                        padrões de qualidade na indústria.
+                    </p>
+                </div>
+
+                <div class="info-card">
+                    <h2>Nossos Valores</h2>
+                    <ul>
+                        <li><strong>Inovação:</strong> Buscamos constantemente novas soluções e tecnologias</li>
+                        <li><strong>Qualidade:</strong> Comprometimento com excelência em cada projeto</li>
+                        <li><strong>Integridade:</strong> Transparência e ética em todas as operações</li>
+                        <li><strong>Comunidade:</strong> Foco nas necessidades dos usuários</li>
+                        <li><strong>Excelência Técnica:</strong> Padrões elevados de desenvolvimento</li>
+                    </ul>
+                </div>
+
+                <div class="legal-notice">
+                    <strong>Aviso Legal:</strong> EclipseByte Studios não é afiliado à Roblox Corporation.
+                </div>
+            </div>
+        </section>
+
+        <!-- ABA 3: EclipseXPloits -->
+        <section class="tab-content" id="exploits">
+            <div class="content-section">
+                <h1>EclipseXPloits</h1>
+                <div class="info-card">
+                    <h2>Sobre o Projeto</h2>
+                    <p>
+                        EclipseXPloits é um projeto focado no desenvolvimento de scripts e ferramentas
+                        para aprimorar experiências em jogos. Nossa equipe trabalha para criar soluções
+                        funcionais e eficientes para a comunidade.
+                    </p>
+                </div>
+
+                <div class="legal-notice">
+                    <strong>Aviso Legal:</strong> EclipseXPloits não possui qualquer parceria, afiliação ou vínculo com a Roblox Corporation.
+                </div>
+
+                <div class="script-showcase">
+                    <h2>Scripts Disponíveis</h2>
+                    <div class="script-card">
+                        <div class="script-header">
+                            <h3>Flick Script</h3>
+                            <span class="script-status">Disponível</span>
+                        </div>
+                        <div class="script-info">
+                            <p><strong>Jogo:</strong> Flick</p>
+                            <p><strong>Link do Jogo:</strong> <a href="https://www.roblox.com/pt/games/136801880565837/Flick" target="_blank">Acessar Jogo</a></p>
+                        </div>
+                        <div class="script-code-container">
+                            <pre class="script-code" id="flickScript">loadstring(game:HttpGet("https://pastebin.com/raw/bFgPjC9F"))()</pre>
+                            <button class="btn-copy" onclick="copyScript('flickScript')">Copiar Script</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ABA 4: Links -->
+        <section class="tab-content" id="links">
+            <div class="content-section">
+                <h1>Links Importantes</h1>
+                <div class="links-container">
+                    <a href="https://linktr.ee/silva777only" target="_blank" class="link-card">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
                         </svg>
-                        <span>Não possuímos qualquer parceria, afiliação ou vínculo com a Roblox Corporation.</span>
-                    </div>
+                        <h3>Linktree</h3>
+                        <p>Todos os links em um só lugar</p>
+                    </a>
+
+                    <a href="https://portfoliosilva.github.io/portfoliosilva/" target="_blank" class="link-card">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="9" y1="3" x2="9" y2="21"></line>
+                        </svg>
+                        <h3>Portfólio</h3>
+                        <p>Conheça nossos trabalhos</p>
+                    </a>
+
+                    <a href="https://discord.gg/44JNZkrtpy" target="_blank" class="link-card">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515a.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0a12.64 12.64 0 0 0-.617-1.25a.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057a19.9 19.9 0 0 0 5.993 3.03a.078.078 0 0 0 .084-.028a14.09 14.09 0 0 0 1.226-1.994a.076.076 0 0 0-.041-.106a13.107 13.107 0 0 1-1.872-.892a.077.077 0 0 1-.008-.128a10.2 10.2 0 0 0 .372-.292a.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127a12.299 12.299 0 0 1-1.873.892a.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028a19.839 19.839 0 0 0 6.002-3.03a.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.956-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.955-2.419 2.157-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.946 2.418-2.157 2.418z"/>
+                        </svg>
+                        <h3>Discord</h3>
+                        <p>Junte-se à nossa comunidade</p>
+                    </a>
                 </div>
             </div>
         </section>
 
-        <!-- ========== ECLIPSEBYTE STUDIOS PAGE ========== -->
-        <section class="page" id="studio">
-            <div class="container">
-                <div class="page-header">
-                    <h1 class="page-title">EclipseByte Studios</h1>
-                    <div class="page-divider"></div>
-                </div>
-                
-                <div class="studio-content">
-                    <div class="studio-section animate-slide-left">
-                        <h2>Sobre Nós</h2>
-                        <p>
-                            EclipseByte Studios é um estúdio independente focado em desenvolvimento de projetos 
-                            tecnológicos inovadores. Fundado com a visão de criar soluções que fazem a diferença, 
-                            nosso time trabalha incansavelmente para entregar produtos de alta qualidade.
-                        </p>
-                        <p>
-                            Com uma equipe apaixonada por tecnologia e criatividade, buscamos constantemente 
-                            ultrapassar os limites do que é possível, sempre mantendo nossos valores fundamentais 
-                            de integridade, inovação e excelência.
-                        </p>
-                    </div>
-
-                    <div class="values-grid">
-                        <div class="value-card animate-scale">
-                            <div class="value-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <circle cx="12" cy="12" r="10"></circle>
-                                    <line x1="2" y1="12" x2="22" y2="12"></line>
-                                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
-                                </svg>
-                            </div>
-                            <h3>Missão</h3>
-                            <p>Desenvolver soluções tecnológicas que transformem ideias em realidade, 
-                            proporcionando experiências excepcionais para nossa comunidade.</p>
-                        </div>
-
-                        <div class="value-card animate-scale delay-1">
-                            <div class="value-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                    <circle cx="12" cy="12" r="3"></circle>
-                                </svg>
-                            </div>
-                            <h3>Visão</h3>
-                            <p>Ser reconhecido como referência em inovação e qualidade, inspirando 
-                            outros desenvolvedores a criar projetos impactantes.</p>
-                        </div>
-
-                        <div class="value-card animate-scale delay-2">
-                            <div class="value-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                                </svg>
-                            </div>
-                            <h3>Valores</h3>
-                            <p>Integridade, transparência, inovação contínua, respeito à comunidade 
-                            e compromisso com a excelência em tudo que fazemos.</p>
-                        </div>
-                    </div>
-
-                    <div class="legal-notice-box animate-fade-up">
-                        <h4>Aviso Legal</h4>
-                        <p>EclipseByte Studios não é afiliado à Roblox Corporation.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ========== ECLIPSEXPLOITS PAGE ========== -->
-        <section class="page" id="xploits">
-            <div class="container">
-                <div class="page-header">
-                    <h1 class="page-title">EclipseXPloits</h1>
-                    <div class="page-divider"></div>
-                </div>
-
-                <div class="xploits-content">
-                    <div class="xploits-intro animate-fade-up">
-                        <p>
-                            EclipseXPloits é um projeto desenvolvido pela EclipseByte Studios, 
-                            focado em criar scripts e ferramentas para diversos fins. 
-                            Todos os nossos scripts são desenvolvidos com cuidado e testados extensivamente.
-                        </p>
-                    </div>
-
-                    <div class="legal-warning animate-pulse-border">
-                        <div class="warning-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-                                <line x1="12" y1="9" x2="12" y2="13"></line>
-                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                            </svg>
-                        </div>
-                        <p><strong>AVISO LEGAL:</strong> EclipseXPloits não possui qualquer parceria, 
-                        afiliação ou vínculo com a Roblox Corporation.</p>
-                    </div>
-
-                    <div class="scripts-section">
-                        <h2 class="section-title">Scripts Disponíveis</h2>
-                        
-                        <div class="script-card animate-slide-up">
-                            <div class="script-header">
-                                <div class="script-info">
-                                    <h3>Flick Script</h3>
-                                    <span class="script-badge">Novo</span>
-                                </div>
-                                <a href="https://www.roblox.com/pt/games/136801880565837/Flick" 
-                                   target="_blank" 
-                                   rel="noopener noreferrer" 
-                                   class="game-link">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                                        <polyline points="15 3 21 3 21 9"></polyline>
-                                        <line x1="10" y1="14" x2="21" y2="3"></line>
-                                    </svg>
-                                    Ver Jogo
-                                </a>
-                            </div>
-                            
-                            <p class="script-description">Script para o jogo Flick no Roblox.</p>
-                            
-                            <div class="script-code-container">
-                                <div class="code-header">
-                                    <span>Lua</span>
-                                    <button class="copy-btn" data-script='loadstring(game:HttpGet("https://pastebin.com/raw/bFgPjC9F"))()'>
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                                        </svg>
-                                        <span>Copiar Script</span>
-                                    </button>
-                                </div>
-                                <pre class="script-code"><code>loadstring(game:HttpGet("https://pastebin.com/raw/bFgPjC9F"))()</code></pre>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ========== LINKS PAGE ========== -->
-        <section class="page" id="links">
-            <div class="container">
-                <div class="page-header">
-                    <h1 class="page-title">Links</h1>
-                    <div class="page-divider"></div>
-                </div>
-
-                <div class="links-content">
-                    <p class="links-intro animate-fade-up">Conecte-se conosco através das nossas redes e plataformas.</p>
-                    
-                    <div class="links-grid">
-                        <a href="https://linktr.ee/silva777only" target="_blank" rel="noopener noreferrer" class="link-card animate-slide-up">
-                            <div class="link-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
-                                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
-                                </svg>
-                            </div>
-                            <span class="link-title">Linktree</span>
-                            <span class="link-subtitle">Todos os links em um só lugar</span>
-                        </a>
-
-                        <a href="https://portfoliosilva.github.io/portfoliosilva/" target="_blank" rel="noopener noreferrer" class="link-card animate-slide-up delay-1">
-                            <div class="link-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-                                </svg>
-                            </div>
-                            <span class="link-title">Portfólio</span>
-                            <span class="link-subtitle">Confira nossos trabalhos</span>
-                        </a>
-
-                        <a href="https://discord.gg/44JNZkrtpy" target="_blank" rel="noopener noreferrer" class="link-card animate-slide-up delay-2">
-                            <div class="link-icon">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                                </svg>
-                            </div>
-                            <span class="link-title">Discord</span>
-                            <span class="link-subtitle">Entre na nossa comunidade</span>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ========== CONTATO PAGE ========== -->
-        <section class="page" id="contato">
-            <div class="container">
-                <div class="page-header">
-                    <h1 class="page-title">Contato</h1>
-                    <div class="page-divider"></div>
-                </div>
-
-                <div class="contact-content">
-                    <form class="contact-form animate-fade-up" id="contactForm">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="firstName">Nome *</label>
-                                <input type="text" id="firstName" name="firstName" required placeholder="Seu nome">
-                            </div>
-                            <div class="form-group">
-                                <label for="lastName">Sobrenome *</label>
-                                <input type="text" id="lastName" name="lastName" required placeholder="Seu sobrenome">
-                            </div>
-                        </div>
-
+        <!-- ABA 5: Contato -->
+        <section class="tab-content" id="contato">
+            <div class="content-section">
+                <h1>Entre em Contato</h1>
+                <form class="contact-form" id="contactForm">
+                    <div class="form-row">
                         <div class="form-group">
-                            <label for="email">Email *</label>
-                            <input type="email" id="email" name="email" required placeholder="seu@email.com">
+                            <label for="firstName">Nome *</label>
+                            <input type="text" id="firstName" required>
                         </div>
-
                         <div class="form-group">
-                            <label for="subject">Assunto *</label>
-                            <input type="text" id="subject" name="subject" required placeholder="Assunto da mensagem">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="message">Mensagem *</label>
-                            <textarea id="message" name="message" required placeholder="Descreva sua mensagem..." rows="5"></textarea>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="contactMethod">Meio de Contato Preferido *</label>
-                                <select id="contactMethod" name="contactMethod" required>
-                                    <option value="">Selecione...</option>
-                                    <option value="email">Email</option>
-                                    <option value="phone">Número de Telefone</option>
-                                    <option value="discord">Discord</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="contactInfo">Informação de Contato *</label>
-                                <input type="text" id="contactInfo" name="contactInfo" required placeholder="Seu contato escolhido">
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="reason">Motivo do Contato *</label>
-                                <select id="reason" name="reason" required>
-                                    <option value="">Selecione o motivo...</option>
-                                    <option value="partnership">Parceria</option>
-                                    <option value="support">Suporte Técnico</option>
-                                    <option value="bug">Reportar Bug</option>
-                                    <option value="suggestion">Sugestão</option>
-                                    <option value="dmca">Remoção de Conteúdo (DMCA)</option>
-                                    <option value="question">Dúvida Geral</option>
-                                    <option value="other">Outro</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="sector">Setor *</label>
-                                <select id="sector" name="sector" required>
-                                    <option value="">Selecione o setor...</option>
-                                    <option value="EclipseByte Studios">EclipseByte Studios</option>
-                                    <option value="EclipseXPloits">EclipseXPloits</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
-                            <span>Enviar Mensagem</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <line x1="22" y1="2" x2="11" y2="13"></line>
-                                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                            </svg>
-                        </button>
-                    </form>
-
-                    <!-- Mensagem de Status -->
-                    <div class="form-status hidden" id="formStatus"></div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ========== PROFILE PAGE ========== -->
-        <section class="page" id="profile">
-            <div class="container">
-                <div class="profile-page">
-                    <div class="profile-banner" id="profileBanner">
-                        <div class="profile-banner-overlay"></div>
-                    </div>
-                    
-                    <div class="profile-content">
-                        <div class="profile-header">
-                            <div class="profile-avatar-large" id="profileAvatarLarge">
-                                <img src="/placeholder.svg" alt="Avatar" id="profileImg">
-                            </div>
-                            <div class="profile-info">
-                                <h1 id="profileUsername"></h1>
-                                <div class="profile-badges" id="profileBadges"></div>
-                                <p class="profile-bio" id="profileBio"></p>
-                                <span class="profile-member-since" id="profileMemberSince"></span>
-                            </div>
+                            <label for="lastName">Sobrenome *</label>
+                            <input type="text" id="lastName" required>
                         </div>
                     </div>
-                </div>
+
+                    <div class="form-group">
+                        <label for="email">Email *</label>
+                        <input type="email" id="email" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="subject">Assunto *</label>
+                        <input type="text" id="subject" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="sector">Setor do Contato *</label>
+                        <select id="sector" required>
+                            <option value="">Selecione...</option>
+                            <option value="EclipseByte Studios">EclipseByte Studios</option>
+                            <option value="EclipseXPloits">EclipseXPloits</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reason">Motivo do Contato *</label>
+                        <select id="reason" required>
+                            <option value="">Selecione...</option>
+                            <option value="Parceria">Parceria</option>
+                            <option value="Suporte técnico">Suporte técnico</option>
+                            <option value="Reportar bug">Reportar bug</option>
+                            <option value="Sugestão">Sugestão</option>
+                            <option value="Recrutamento">Recrutamento</option>
+                            <option value="Dúvida geral">Dúvida geral</option>
+                            <option value="Outro">Outro</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="contactMethod">Meio de Contato Preferido *</label>
+                        <select id="contactMethod" required>
+                            <option value="">Selecione...</option>
+                            <option value="Email">Email</option>
+                            <option value="Número">Número</option>
+                            <option value="Discord">Discord</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="contactInfo">Informação de Contato *</label>
+                        <input type="text" id="contactInfo" placeholder="Digite seu email, número ou Discord" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="message">Descrição da Mensagem *</label>
+                        <textarea id="message" rows="6" required></textarea>
+                    </div>
+
+                    <button type="submit" class="btn-primary">Enviar Mensagem</button>
+                    <div class="form-message" id="formMessage"></div>
+                </form>
             </div>
         </section>
     </main>
 
-    <!-- ==================== MODALS ==================== -->
-    
-    <!-- Modal de Sign In -->
-    <div class="modal-overlay hidden" id="signinModal">
-        <div class="modal animate-scale-in">
-            <button class="modal-close" id="closeSignin">&times;</button>
-            <h2>Sign In</h2>
-            <form id="signinForm">
-                <div class="form-group">
-                    <label for="signinUsername">Username ou Email</label>
-                    <input type="text" id="signinUsername" required placeholder="Seu username ou email">
-                </div>
-                <div class="form-group">
-                    <label for="signinPassword">Senha</label>
-                    <input type="password" id="signinPassword" required placeholder="Sua senha">
-                </div>
-                <button type="submit" class="btn btn-primary btn-block">Entrar</button>
-            </form>
-            <p class="modal-footer">Não tem conta? <a href="#" id="switchToSignup">Criar conta</a></p>
-        </div>
-    </div>
-
-    <!-- Modal de Sign Up -->
-    <div class="modal-overlay hidden" id="signupModal">
-        <div class="modal animate-scale-in">
-            <button class="modal-close" id="closeSignup">&times;</button>
-            <h2>Sign Up</h2>
-            <form id="signupForm">
-                <div class="form-group">
-                    <label for="signupUsername">Username *</label>
-                    <input type="text" id="signupUsername" required placeholder="Escolha um username">
-                </div>
-                <div class="form-group">
-                    <label for="signupEmail">Email *</label>
-                    <input type="email" id="signupEmail" required placeholder="seu@email.com">
-                </div>
-                <div class="form-group">
-                    <label for="signupPassword">Senha *</label>
-                    <input type="password" id="signupPassword" required placeholder="Crie uma senha">
-                </div>
-                <div class="form-group">
-                    <label for="signupBio">Bio</label>
-                    <textarea id="signupBio" placeholder="Fale um pouco sobre você..." rows="3"></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="signupAvatar">Foto de Perfil</label>
-                    <input type="file" id="signupAvatar" accept="image/*">
-                    <div class="avatar-preview hidden" id="avatarPreview">
-                        <img src="/placeholder.svg" alt="Preview" id="avatarPreviewImg">
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-primary btn-block">Criar Conta</button>
-            </form>
-            <p class="modal-footer">Já tem conta? <a href="#" id="switchToSignin">Fazer login</a></p>
-        </div>
-    </div>
-
-    <!-- ==================== PAINÉIS LATERAIS ==================== -->
-    
-    <!-- Painel de Notificações -->
-    <div class="side-panel hidden" id="notificationPanel">
-        <div class="side-panel-header">
-            <h3>Notificações</h3>
-            <button class="panel-close" id="closeNotifications">&times;</button>
-        </div>
-        <div class="side-panel-content" id="notificationList">
-            <!-- Notificações serão inseridas via JS -->
-        </div>
-    </div>
-
-    <!-- Painel de Configurações -->
-    <div class="side-panel hidden" id="settingsPanel">
-        <div class="side-panel-header">
-            <h3>Configurações</h3>
-            <button class="panel-close" id="closeSettings">&times;</button>
-        </div>
-        <div class="side-panel-content">
-            <form id="settingsForm">
-                <div class="settings-section">
-                    <h4>Foto de Perfil</h4>
-                    <div class="settings-avatar">
-                        <img src="/placeholder.svg" alt="Avatar" id="settingsAvatar">
-                        <input type="file" id="changeAvatar" accept="image/*">
-                        <label for="changeAvatar" class="btn btn-outline btn-sm">Alterar Foto</label>
-                    </div>
-                </div>
-
-                <div class="settings-section">
-                    <h4>Banner do Perfil</h4>
-                    <div class="settings-banner">
-                        <div class="banner-preview" id="bannerPreview"></div>
-                        <input type="file" id="changeBanner" accept="image/*">
-                        <label for="changeBanner" class="btn btn-outline btn-sm">Alterar Banner</label>
-                    </div>
-                </div>
-
-                <div class="settings-section">
-                    <h4>Bio</h4>
-                    <textarea id="editBio" rows="4" placeholder="Sua bio..."></textarea>
-                </div>
-
-                <div class="settings-section">
-                    <h4>Seus Emblemas</h4>
-                    <div class="badges-display" id="settingsBadges">
-                        <!-- Emblemas serão inseridos via JS -->
-                    </div>
-                </div>
-
-                <button type="submit" class="btn btn-primary btn-block">Salvar Alterações</button>
-                <button type="button" class="btn btn-outline btn-block" id="logoutBtn">Sair da Conta</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Overlay para painéis -->
-    <div class="panel-overlay hidden" id="panelOverlay"></div>
-
-    <!-- ==================== TOAST NOTIFICATIONS ==================== -->
-    <div class="toast-container" id="toastContainer"></div>
-
-    <!-- ==================== FOOTER ==================== -->
+    <!-- Footer -->
     <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-brand">
-                    <img src="https://i.ibb.co/hFcgn43s/image-removebg-preview.png" alt="EclipseByte Logo" class="footer-logo">
-                    <span>EclipseByte Studios</span>
-                </div>
-                <div class="footer-legal">
-                    <p>EclipseByte Studios e EclipseXPloits não possuem qualquer vínculo com a Roblox Corporation.</p>
-                </div>
-                <div class="footer-copyright">
-                    <p>&copy; <span id="currentYear"></span> EclipseByte Studios – Todos os direitos reservados.</p>
-                </div>
-            </div>
+        <div class="footer-content">
+            <p class="footer-legal">
+                EclipseByte Studios e EclipseXPloits não possuem qualquer vínculo com a Roblox Corporation.
+            </p>
+            <p class="footer-copyright">
+                © EclipseByte Studios – Todos os direitos reservados
+            </p>
         </div>
     </footer>
 
