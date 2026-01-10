@@ -4,18 +4,150 @@
    e funcionalidades do site
    =========================================== */
 
+// ==================== CONSTANTES ====================
+const WEBHOOK_URL =
+  "https://discord.com/api/webhooks/1459229422220611584/hOdCqWKLZnGiEsbIJCJw6jQtjrAxZuGBwydgwTQ_PVwx7Ki9vpzKTIDoSkwwVCMGH3co"
+const ADMIN_USERNAME = "silva777only"
+
+// ==================== ANTI-DEVTOOLS ====================
+;(() => {
+  // Bloqueia Ctrl+U (View Source)
+  document.addEventListener("keydown", (e) => {
+    if (e.ctrlKey && e.key === "u") {
+      e.preventDefault()
+      showToast("Ação bloqueada", "error")
+      return false
+    }
+    // Bloqueia Ctrl+Shift+I (DevTools)
+    if (e.ctrlKey && e.shiftKey && e.key === "I") {
+      e.preventDefault()
+      showToast("Ação bloqueada", "error")
+      return false
+    }
+    // Bloqueia Ctrl+Shift+J (Console)
+    if (e.ctrlKey && e.shiftKey && e.key === "J") {
+      e.preventDefault()
+      showToast("Ação bloqueada", "error")
+      return false
+    }
+    // Bloqueia Ctrl+Shift+C (Inspect Element)
+    if (e.ctrlKey && e.shiftKey && e.key === "C") {
+      e.preventDefault()
+      showToast("Ação bloqueada", "error")
+      return false
+    }
+    // Bloqueia F12
+    if (e.key === "F12") {
+      e.preventDefault()
+      showToast("Ação bloqueada", "error")
+      return false
+    }
+  })
+
+  // Bloqueia clique direito
+  document.addEventListener("contextmenu", (e) => {
+    e.preventDefault()
+    showToast("Clique direito desabilitado", "error")
+    return false
+  })
+})()
+
 // ==================== INICIALIZAÇÃO ====================
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
+  await trackVisit()
+
   initNavigation()
   initScrollEffects()
   initModals()
   initPanels()
   initAuth()
   initContactForm()
-  initCopyButtons()
   initNotifications()
+  initSettingsTabs()
+  initAdminPanel()
+  initUsernameCheck()
   updateYear()
+  checkBannedIP()
 })
+
+// ==================== IP & TRACKING ====================
+let userIP = null
+let userLocation = null
+
+async function getUserIP() {
+  try {
+    const response = await fetch("https://api.ipify.org?format=json")
+    const data = await response.json()
+    userIP = data.ip
+    return userIP
+  } catch (error) {
+    userIP = "Unknown"
+    return userIP
+  }
+}
+
+async function getUserLocation() {
+  try {
+    if (!userIP || userIP === "Unknown") await getUserIP()
+    const response = await fetch(`https://ipapi.co/${userIP}/json/`)
+    const data = await response.json()
+    userLocation = `${data.city || "Unknown"}, ${data.region || ""}, ${data.country_name || "Unknown"}`
+    return userLocation
+  } catch (error) {
+    userLocation = "Unknown"
+    return userLocation
+  }
+}
+
+async function trackVisit() {
+  await getUserIP()
+  await getUserLocation()
+
+  // Armazena IP para recuperação de senha
+  localStorage.setItem("eclipsebyte_visitor_ip", userIP)
+
+  // Envia webhook de visita
+  const embed = {
+    embeds: [
+      {
+        title: "👁️ Nova Visita ao Site",
+        color: 3447003,
+        fields: [
+          { name: "🌐 IP", value: userIP || "Unknown", inline: true },
+          { name: "📍 Localização", value: userLocation || "Unknown", inline: true },
+          { name: "🕐 Data/Hora", value: new Date().toLocaleString("pt-BR"), inline: false },
+        ],
+        footer: { text: "EclipseByte Studios - Sistema de Tracking" },
+        timestamp: new Date().toISOString(),
+      },
+    ],
+  }
+
+  try {
+    await fetch(WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(embed),
+    })
+  } catch (error) {
+    console.log("Webhook error")
+  }
+}
+
+// ==================== VERIFICAÇÃO DE BAN ====================
+function checkBannedIP() {
+  const bannedIPs = JSON.parse(localStorage.getItem("eclipsebyte_banned_ips") || "[]")
+  if (bannedIPs.includes(userIP)) {
+    document.body.innerHTML = `
+      <div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; background: #000; color: #fff; text-align: center; padding: 20px;">
+        <div>
+          <h1 style="font-size: 2rem; margin-bottom: 1rem;">Acesso Bloqueado</h1>
+          <p style="color: #888;">Seu IP foi banido do EclipseByte Studios.</p>
+        </div>
+      </div>
+    `
+  }
+}
 
 // ==================== NAVEGAÇÃO ====================
 function initNavigation() {
@@ -24,42 +156,33 @@ function initNavigation() {
   const mobileMenuBtn = document.getElementById("mobileMenuBtn")
   const navbarMenu = document.getElementById("navbarMenu")
 
-  // Navegação entre páginas
   navLinks.forEach((link) => {
     link.addEventListener("click", (e) => {
       e.preventDefault()
       const targetPage = link.getAttribute("data-page")
 
-      // Atualiza links ativos
       navLinks.forEach((l) => l.classList.remove("active"))
       link.classList.add("active")
 
-      // Mostra página correspondente
       pages.forEach((page) => {
         page.classList.remove("active")
         if (page.id === targetPage) {
           page.classList.add("active")
-          // Reinicia animações
           restartAnimations(page)
         }
       })
 
-      // Fecha menu mobile
       navbarMenu.classList.remove("active")
       mobileMenuBtn.classList.remove("active")
-
-      // Scroll para o topo
       window.scrollTo({ top: 0, behavior: "smooth" })
     })
   })
 
-  // Menu mobile
   mobileMenuBtn.addEventListener("click", () => {
     mobileMenuBtn.classList.toggle("active")
     navbarMenu.classList.toggle("active")
   })
 
-  // Botão de perfil
   const profileBtn = document.getElementById("profileBtn")
   if (profileBtn) {
     profileBtn.addEventListener("click", () => {
@@ -68,7 +191,6 @@ function initNavigation() {
   }
 }
 
-// Função para mostrar página de perfil
 function showProfilePage() {
   const pages = document.querySelectorAll(".page")
   const navLinks = document.querySelectorAll(".nav-link")
@@ -81,12 +203,11 @@ function showProfilePage() {
   window.scrollTo({ top: 0, behavior: "smooth" })
 }
 
-// Reinicia animações de uma página
 function restartAnimations(page) {
   const animatedElements = page.querySelectorAll('[class*="animate-"]')
   animatedElements.forEach((el) => {
     el.style.animation = "none"
-    el.offsetHeight // Trigger reflow
+    el.offsetHeight
     el.style.animation = null
   })
 }
@@ -106,56 +227,74 @@ function initScrollEffects() {
 
 // ==================== MODAIS ====================
 function initModals() {
-  // Sign In Modal
   const signinBtn = document.getElementById("signinBtn")
   const signinModal = document.getElementById("signinModal")
   const closeSignin = document.getElementById("closeSignin")
 
-  // Sign Up Modal
   const signupBtn = document.getElementById("signupBtn")
   const signupModal = document.getElementById("signupModal")
   const closeSignup = document.getElementById("closeSignup")
 
-  // Switch entre modais
   const switchToSignup = document.getElementById("switchToSignup")
   const switchToSignin = document.getElementById("switchToSignin")
 
-  // Abrir Sign In
+  const forgotPasswordLink = document.getElementById("forgotPasswordLink")
+  const forgotPasswordModal = document.getElementById("forgotPasswordModal")
+  const closeForgotPassword = document.getElementById("closeForgotPassword")
+  const backToSignin = document.getElementById("backToSignin")
+
   signinBtn.addEventListener("click", () => {
     signinModal.classList.remove("hidden")
   })
 
-  // Fechar Sign In
   closeSignin.addEventListener("click", () => {
     signinModal.classList.add("hidden")
   })
 
-  // Abrir Sign Up
   signupBtn.addEventListener("click", () => {
     signupModal.classList.remove("hidden")
   })
 
-  // Fechar Sign Up
   closeSignup.addEventListener("click", () => {
     signupModal.classList.add("hidden")
   })
 
-  // Switch para Sign Up
   switchToSignup.addEventListener("click", (e) => {
     e.preventDefault()
     signinModal.classList.add("hidden")
     signupModal.classList.remove("hidden")
   })
 
-  // Switch para Sign In
   switchToSignin.addEventListener("click", (e) => {
     e.preventDefault()
     signupModal.classList.add("hidden")
     signinModal.classList.remove("hidden")
   })
 
-  // Fechar ao clicar fora
-  ;[signinModal, signupModal].forEach((modal) => {
+  // Forgot password
+  forgotPasswordLink.addEventListener("click", (e) => {
+    e.preventDefault()
+    signinModal.classList.add("hidden")
+    forgotPasswordModal.classList.remove("hidden")
+  })
+
+  closeForgotPassword.addEventListener("click", () => {
+    forgotPasswordModal.classList.add("hidden")
+  })
+
+  backToSignin.addEventListener("click", (e) => {
+    e.preventDefault()
+    forgotPasswordModal.classList.add("hidden")
+    signinModal.classList.remove("hidden")
+  })
+
+  // Forgot password form
+  const forgotPasswordForm = document.getElementById("forgotPasswordForm")
+  forgotPasswordForm.addEventListener("submit", (e) => {
+    e.preventDefault()
+    handlePasswordRecovery()
+  })
+  ;[signinModal, signupModal, forgotPasswordModal].forEach((modal) => {
     modal.addEventListener("click", (e) => {
       if (e.target === modal) {
         modal.classList.add("hidden")
@@ -163,7 +302,6 @@ function initModals() {
     })
   })
 
-  // Preview de avatar no signup
   const signupAvatar = document.getElementById("signupAvatar")
   const avatarPreview = document.getElementById("avatarPreview")
   const avatarPreviewImg = document.getElementById("avatarPreviewImg")
@@ -181,6 +319,75 @@ function initModals() {
   })
 }
 
+function handlePasswordRecovery() {
+  const recoveryInput = document.getElementById("recoveryInput").value
+  const users = JSON.parse(localStorage.getItem("eclipsebyte_users") || "[]")
+  const currentIP = localStorage.getItem("eclipsebyte_visitor_ip")
+
+  const user = users.find((u) => u.username === recoveryInput || u.email === recoveryInput)
+
+  if (!user) {
+    showToast("Usuário não encontrado", "error")
+    return
+  }
+
+  // Verifica se o IP é o mesmo do registro
+  if (user.registeredIP === currentIP) {
+    // Permite recuperar a senha
+    const newPassword = prompt("Digite sua nova senha:")
+    if (newPassword && newPassword.length >= 4) {
+      const userIndex = users.findIndex((u) => u.username === user.username)
+      users[userIndex].password = newPassword
+      localStorage.setItem("eclipsebyte_users", JSON.stringify(users))
+      showToast("Senha alterada com sucesso!", "success")
+      document.getElementById("forgotPasswordModal").classList.add("hidden")
+      document.getElementById("signinModal").classList.remove("hidden")
+    } else {
+      showToast("Senha deve ter pelo menos 4 caracteres", "error")
+    }
+  } else {
+    // Envia notificação ao dono da conta
+    addNotificationToUser(user.username, {
+      title: "Tentativa de recuperação de senha",
+      message: `Alguém tentou recuperar sua senha de um IP diferente (${currentIP}). Se não foi você, ignore esta mensagem.`,
+      icon: "⚠️",
+      time: "Agora",
+    })
+    showToast("IP não reconhecido. O dono da conta foi notificado.", "error")
+  }
+}
+
+function addNotificationToUser(username, notification) {
+  const userNotifications = JSON.parse(localStorage.getItem(`eclipsebyte_notifications_${username}`) || "[]")
+  userNotifications.unshift(notification)
+  localStorage.setItem(`eclipsebyte_notifications_${username}`, JSON.stringify(userNotifications))
+}
+
+// ==================== USERNAME CHECK ====================
+function initUsernameCheck() {
+  const usernameInput = document.getElementById("signupUsername")
+  const usernameStatus = document.getElementById("usernameStatus")
+
+  usernameInput.addEventListener("input", () => {
+    const username = usernameInput.value.trim()
+    if (username.length < 3) {
+      usernameStatus.textContent = ""
+      return
+    }
+
+    const users = JSON.parse(localStorage.getItem("eclipsebyte_users") || "[]")
+    const isTaken = users.some((u) => u.username.toLowerCase() === username.toLowerCase())
+
+    if (isTaken) {
+      usernameStatus.textContent = "(indisponível)"
+      usernameStatus.className = "username-status taken"
+    } else {
+      usernameStatus.textContent = "(disponível)"
+      usernameStatus.className = "username-status available"
+    }
+  })
+}
+
 // ==================== PAINÉIS LATERAIS ====================
 function initPanels() {
   const notificationBtn = document.getElementById("notificationBtn")
@@ -193,18 +400,16 @@ function initPanels() {
 
   const panelOverlay = document.getElementById("panelOverlay")
 
-  // Abrir notificações
   notificationBtn.addEventListener("click", () => {
     closePanels()
     notificationPanel.classList.remove("hidden")
     notificationPanel.classList.add("active")
     panelOverlay.classList.remove("hidden")
+    loadNotifications()
   })
 
-  // Fechar notificações
   closeNotifications.addEventListener("click", closePanels)
 
-  // Abrir configurações
   settingsBtn.addEventListener("click", () => {
     const currentUser = getCurrentUser()
     if (!currentUser) {
@@ -218,13 +423,9 @@ function initPanels() {
     loadSettingsData()
   })
 
-  // Fechar configurações
   closeSettings.addEventListener("click", closePanels)
-
-  // Fechar ao clicar no overlay
   panelOverlay.addEventListener("click", closePanels)
 
-  // Configurações de avatar
   const changeAvatar = document.getElementById("changeAvatar")
   changeAvatar.addEventListener("change", (e) => {
     const file = e.target.files[0]
@@ -237,7 +438,6 @@ function initPanels() {
     }
   })
 
-  // Configurações de banner
   const changeBanner = document.getElementById("changeBanner")
   changeBanner.addEventListener("change", (e) => {
     const file = e.target.files[0]
@@ -250,18 +450,42 @@ function initPanels() {
     }
   })
 
-  // Formulário de configurações
   const settingsForm = document.getElementById("settingsForm")
   settingsForm.addEventListener("submit", (e) => {
     e.preventDefault()
     saveSettings()
   })
 
-  // Logout
+  const privacyForm = document.getElementById("privacyForm")
+  privacyForm.addEventListener("submit", (e) => {
+    e.preventDefault()
+    savePrivacySettings()
+  })
+
   const logoutBtn = document.getElementById("logoutBtn")
   logoutBtn.addEventListener("click", () => {
     logout()
     closePanels()
+  })
+}
+
+function initSettingsTabs() {
+  const tabs = document.querySelectorAll(".settings-tab")
+  const tabContents = {
+    profile: document.getElementById("profileSettingsTab"),
+    privacy: document.getElementById("privacySettingsTab"),
+  }
+
+  tabs.forEach((tab) => {
+    tab.addEventListener("click", () => {
+      const targetTab = tab.getAttribute("data-tab")
+
+      tabs.forEach((t) => t.classList.remove("active"))
+      tab.classList.add("active")
+
+      Object.values(tabContents).forEach((content) => content.classList.remove("active"))
+      tabContents[targetTab].classList.add("active")
+    })
   })
 }
 
@@ -291,15 +515,18 @@ function loadSettingsData() {
     : ""
   document.getElementById("editBio").value = currentUser.bio || ""
 
-  // Emblemas
+  // Load privacy data
+  document.getElementById("newEmail").value = ""
+  document.getElementById("currentPassword").value = ""
+  document.getElementById("newPassword").value = ""
+  document.getElementById("confirmPassword").value = ""
+
   const badgesContainer = document.getElementById("settingsBadges")
   badgesContainer.innerHTML = ""
 
   const badges = getUserBadges(currentUser.username)
   badges.forEach((badge) => {
-    const badgeEl = document.createElement("span")
-    badgeEl.className = `badge ${badge.class}`
-    badgeEl.textContent = badge.name
+    const badgeEl = createBadgeElement(badge)
     badgesContainer.appendChild(badgeEl)
   })
 }
@@ -313,16 +540,13 @@ function saveSettings() {
 
   if (userIndex === -1) return
 
-  // Atualiza bio
   users[userIndex].bio = document.getElementById("editBio").value
 
-  // Atualiza avatar se foi alterado
   const avatarImg = document.getElementById("settingsAvatar")
   if (avatarImg.src && !avatarImg.src.includes("placeholder")) {
     users[userIndex].avatar = avatarImg.src
   }
 
-  // Atualiza banner se foi alterado
   const bannerPreview = document.getElementById("bannerPreview")
   const bannerBg = bannerPreview.style.backgroundImage
   if (bannerBg && bannerBg !== "none") {
@@ -337,13 +561,167 @@ function saveSettings() {
   closePanels()
 }
 
+function savePrivacySettings() {
+  const currentUser = getCurrentUser()
+  if (!currentUser) return
+
+  const users = JSON.parse(localStorage.getItem("eclipsebyte_users") || "[]")
+  const userIndex = users.findIndex((u) => u.username === currentUser.username)
+
+  if (userIndex === -1) return
+
+  const newEmail = document.getElementById("newEmail").value
+  const currentPassword = document.getElementById("currentPassword").value
+  const newPassword = document.getElementById("newPassword").value
+  const confirmPassword = document.getElementById("confirmPassword").value
+
+  // Update email
+  if (newEmail && newEmail !== currentUser.email) {
+    const emailExists = users.some((u) => u.email === newEmail && u.username !== currentUser.username)
+    if (emailExists) {
+      showToast("Este email já está em uso", "error")
+      return
+    }
+    users[userIndex].email = newEmail
+  }
+
+  // Update password
+  if (newPassword) {
+    if (currentPassword !== currentUser.password) {
+      showToast("Senha atual incorreta", "error")
+      return
+    }
+    if (newPassword !== confirmPassword) {
+      showToast("As senhas não coincidem", "error")
+      return
+    }
+    if (newPassword.length < 4) {
+      showToast("A senha deve ter pelo menos 4 caracteres", "error")
+      return
+    }
+    users[userIndex].password = newPassword
+  }
+
+  localStorage.setItem("eclipsebyte_users", JSON.stringify(users))
+  localStorage.setItem("eclipsebyte_current_user", JSON.stringify(users[userIndex]))
+
+  showToast("Configurações de privacidade salvas!", "success")
+
+  // Clear fields
+  document.getElementById("newEmail").value = ""
+  document.getElementById("currentPassword").value = ""
+  document.getElementById("newPassword").value = ""
+  document.getElementById("confirmPassword").value = ""
+}
+
+// ==================== ADMIN PANEL ====================
+function initAdminPanel() {
+  const adminBtn = document.getElementById("adminBtn")
+  const adminPanel = document.getElementById("adminPanel")
+  const closeAdmin = document.getElementById("closeAdmin")
+  const panelOverlay = document.getElementById("panelOverlay")
+  const banIpBtn = document.getElementById("banIpBtn")
+
+  adminBtn.addEventListener("click", () => {
+    closePanels()
+    adminPanel.classList.remove("hidden")
+    adminPanel.classList.add("active")
+    panelOverlay.classList.remove("hidden")
+    loadAdminData()
+  })
+
+  closeAdmin.addEventListener("click", closePanels)
+
+  banIpBtn.addEventListener("click", () => {
+    const ip = document.getElementById("banIpInput").value.trim()
+    if (ip) {
+      banIP(ip)
+      document.getElementById("banIpInput").value = ""
+    }
+  })
+}
+
+function loadAdminData() {
+  const users = JSON.parse(localStorage.getItem("eclipsebyte_users") || "[]")
+  const bannedIPs = JSON.parse(localStorage.getItem("eclipsebyte_banned_ips") || "[]")
+
+  // Load users list
+  const usersList = document.getElementById("adminUsersList")
+  usersList.innerHTML = users
+    .map(
+      (user) => `
+    <div class="admin-user-item">
+      <div class="admin-user-info">
+        <img src="${user.avatar || generateDefaultAvatar(user.username)}" class="admin-user-avatar" alt="${user.username}">
+        <div>
+          <div class="admin-user-name">${user.username}</div>
+          <div class="admin-user-ip">IP: ${user.registeredIP || "Unknown"}</div>
+        </div>
+      </div>
+      ${user.username !== ADMIN_USERNAME ? `<button class="btn btn-sm btn-danger" onclick="banUserByIP('${user.registeredIP}', '${user.username}')">Banir</button>` : ""}
+    </div>
+  `,
+    )
+    .join("")
+
+  // Load banned IPs
+  const bannedList = document.getElementById("bannedIpsList")
+  bannedList.innerHTML =
+    bannedIPs
+      .map(
+        (ip) => `
+    <div class="banned-ip-item">
+      <span>${ip}</span>
+      <button class="btn btn-sm btn-outline" onclick="unbanIP('${ip}')">Desbanir</button>
+    </div>
+  `,
+      )
+      .join("") || '<p style="color: #666; font-size: 0.85rem;">Nenhum IP banido</p>'
+}
+
+function banIP(ip) {
+  const bannedIPs = JSON.parse(localStorage.getItem("eclipsebyte_banned_ips") || "[]")
+  if (!bannedIPs.includes(ip)) {
+    bannedIPs.push(ip)
+    localStorage.setItem("eclipsebyte_banned_ips", JSON.stringify(bannedIPs))
+    showToast(`IP ${ip} banido com sucesso`, "success")
+    loadAdminData()
+  } else {
+    showToast("Este IP já está banido", "error")
+  }
+}
+
+function banUserByIP(ip, username) {
+  if (ip && ip !== "Unknown") {
+    banIP(ip)
+    // Remove user
+    const users = JSON.parse(localStorage.getItem("eclipsebyte_users") || "[]")
+    const filteredUsers = users.filter((u) => u.username !== username)
+    localStorage.setItem("eclipsebyte_users", JSON.stringify(filteredUsers))
+    loadAdminData()
+  } else {
+    showToast("IP do usuário desconhecido", "error")
+  }
+}
+
+function unbanIP(ip) {
+  const bannedIPs = JSON.parse(localStorage.getItem("eclipsebyte_banned_ips") || "[]")
+  const filtered = bannedIPs.filter((i) => i !== ip)
+  localStorage.setItem("eclipsebyte_banned_ips", JSON.stringify(filtered))
+  showToast(`IP ${ip} desbanido`, "success")
+  loadAdminData()
+}
+
+// Make functions available globally for onclick handlers
+window.banUserByIP = banUserByIP
+window.unbanIP = unbanIP
+
 // ==================== SISTEMA DE AUTENTICAÇÃO ====================
 function initAuth() {
   const signinForm = document.getElementById("signinForm")
   const signupForm = document.getElementById("signupForm")
 
-  // Sign In
-  signinForm.addEventListener("submit", (e) => {
+  signinForm.addEventListener("submit", async (e) => {
     e.preventDefault()
 
     const usernameOrEmail = document.getElementById("signinUsername").value
@@ -360,16 +738,17 @@ function initAuth() {
       updateNavbarProfile()
       showToast(`Bem-vindo de volta, ${user.username}!`, "success")
       signinForm.reset()
+
+      await sendLoginWebhook(user.username)
     } else {
       showToast("Credenciais inválidas", "error")
     }
   })
 
-  // Sign Up
-  signupForm.addEventListener("submit", (e) => {
+  signupForm.addEventListener("submit", async (e) => {
     e.preventDefault()
 
-    const username = document.getElementById("signupUsername").value
+    const username = document.getElementById("signupUsername").value.trim()
     const email = document.getElementById("signupEmail").value
     const password = document.getElementById("signupPassword").value
     const bio = document.getElementById("signupBio").value
@@ -377,8 +756,7 @@ function initAuth() {
 
     const users = JSON.parse(localStorage.getItem("eclipsebyte_users") || "[]")
 
-    // Verifica se usuário já existe
-    if (users.find((u) => u.username === username)) {
+    if (users.find((u) => u.username.toLowerCase() === username.toLowerCase())) {
       showToast("Este username já está em uso", "error")
       return
     }
@@ -388,25 +766,23 @@ function initAuth() {
       return
     }
 
-    // Processa avatar
     let avatar = generateDefaultAvatar(username)
     if (avatarInput.files[0]) {
       const reader = new FileReader()
-      reader.onload = (event) => {
+      reader.onload = async (event) => {
         avatar = event.target.result
-        completeSignup(username, email, password, bio, avatar)
+        await completeSignup(username, email, password, bio, avatar)
       }
       reader.readAsDataURL(avatarInput.files[0])
     } else {
-      completeSignup(username, email, password, bio, avatar)
+      await completeSignup(username, email, password, bio, avatar)
     }
   })
 
-  // Verifica se há usuário logado
   updateNavbarProfile()
 }
 
-function completeSignup(username, email, password, bio, avatar) {
+async function completeSignup(username, email, password, bio, avatar) {
   const users = JSON.parse(localStorage.getItem("eclipsebyte_users") || "[]")
 
   const newUser = {
@@ -417,6 +793,7 @@ function completeSignup(username, email, password, bio, avatar) {
     avatar,
     banner: null,
     createdAt: new Date().toISOString(),
+    registeredIP: userIP, // Store IP for recovery
   }
 
   users.push(newUser)
@@ -426,9 +803,71 @@ function completeSignup(username, email, password, bio, avatar) {
   document.getElementById("signupModal").classList.add("hidden")
   document.getElementById("signupForm").reset()
   document.getElementById("avatarPreview").classList.add("hidden")
+  document.getElementById("usernameStatus").textContent = ""
 
   updateNavbarProfile()
   showToast(`Conta criada com sucesso! Bem-vindo, ${username}!`, "success")
+
+  await sendRegisterWebhook(username, email)
+}
+
+async function sendLoginWebhook(username) {
+  const embed = {
+    embeds: [
+      {
+        title: "🔐 Login Realizado",
+        color: 5763719,
+        fields: [
+          { name: "👤 Usuário", value: username, inline: true },
+          { name: "🌐 IP", value: userIP || "Unknown", inline: true },
+          { name: "📍 Localização", value: userLocation || "Unknown", inline: true },
+          { name: "🕐 Data/Hora", value: new Date().toLocaleString("pt-BR"), inline: false },
+        ],
+        footer: { text: "EclipseByte Studios - Sistema de Auth" },
+        timestamp: new Date().toISOString(),
+      },
+    ],
+  }
+
+  try {
+    await fetch(WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(embed),
+    })
+  } catch (error) {
+    console.log("Webhook error")
+  }
+}
+
+async function sendRegisterWebhook(username, email) {
+  const embed = {
+    embeds: [
+      {
+        title: "📝 Novo Registro",
+        color: 15844367,
+        fields: [
+          { name: "👤 Usuário", value: username, inline: true },
+          { name: "📧 Email", value: email, inline: true },
+          { name: "🌐 IP", value: userIP || "Unknown", inline: true },
+          { name: "📍 Localização", value: userLocation || "Unknown", inline: false },
+          { name: "🕐 Data/Hora", value: new Date().toLocaleString("pt-BR"), inline: false },
+        ],
+        footer: { text: "EclipseByte Studios - Sistema de Auth" },
+        timestamp: new Date().toISOString(),
+      },
+    ],
+  }
+
+  try {
+    await fetch(WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(embed),
+    })
+  } catch (error) {
+    console.log("Webhook error")
+  }
 }
 
 function getCurrentUser() {
@@ -441,15 +880,23 @@ function updateNavbarProfile() {
   const profileMenu = document.getElementById("profileMenu")
   const navAvatar = document.getElementById("navAvatar")
   const navUsername = document.getElementById("navUsername")
+  const adminBtn = document.getElementById("adminBtn")
 
   if (currentUser) {
     authButtons.classList.add("hidden")
     profileMenu.classList.remove("hidden")
     navAvatar.src = currentUser.avatar || generateDefaultAvatar(currentUser.username)
     navUsername.textContent = currentUser.username
+
+    if (currentUser.username.toLowerCase() === ADMIN_USERNAME.toLowerCase()) {
+      adminBtn.classList.remove("hidden")
+    } else {
+      adminBtn.classList.add("hidden")
+    }
   } else {
     authButtons.classList.remove("hidden")
     profileMenu.classList.add("hidden")
+    adminBtn.classList.add("hidden")
   }
 }
 
@@ -458,7 +905,6 @@ function logout() {
   updateNavbarProfile()
   showToast("Você saiu da sua conta", "success")
 
-  // Volta para Home
   const navLinks = document.querySelectorAll(".nav-link")
   const pages = document.querySelectorAll(".page")
 
@@ -470,7 +916,6 @@ function logout() {
 }
 
 function generateDefaultAvatar(username) {
-  // Gera um avatar SVG simples com a inicial do usuário
   const initial = username.charAt(0).toUpperCase()
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">
         <rect width="100" height="100" fill="#262626"/>
@@ -482,16 +927,55 @@ function generateDefaultAvatar(username) {
 function getUserBadges(username) {
   const badges = []
 
-  // Badges especiais para silva777only
-  if (username.toLowerCase() === "silva777only") {
-    badges.push({ name: "Desenvolvedor", class: "developer" })
-    badges.push({ name: "Owner", class: "owner" })
+  if (username.toLowerCase() === ADMIN_USERNAME.toLowerCase()) {
+    badges.push({
+      name: "Desenvolvedor",
+      class: "developer",
+      image:
+        "data:image/svg+xml;base64," +
+        btoa(
+          `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="4" fill="#fff"/><path d="M10 12l-4 4 4 4M22 12l4 4-4 4M18 10l-4 12" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+        ),
+    })
+    badges.push({
+      name: "Owner",
+      class: "owner",
+      image:
+        "data:image/svg+xml;base64," +
+        btoa(
+          `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="4" fill="#262626"/><path d="M16 6l3 6 6 1-4 4 1 6-6-3-6 3 1-6-4-4 6-1 3-6z" fill="#fff"/></svg>`,
+        ),
+    })
   }
 
-  // Badge VIP para todos (visual)
-  badges.push({ name: "Assinante VIP", class: "vip" })
+  badges.push({
+    name: "Assinante VIP",
+    class: "vip",
+    image:
+      "data:image/svg+xml;base64," +
+      btoa(
+        `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="4" fill="#404040"/><path d="M16 8l2 4h5l-4 3 2 5-5-3-5 3 2-5-4-3h5l2-4z" fill="#fff"/></svg>`,
+      ),
+  })
 
   return badges
+}
+
+function createBadgeElement(badge) {
+  if (badge.image) {
+    const container = document.createElement("div")
+    container.className = "badge-img"
+    container.innerHTML = `
+      <img src="${badge.image}" alt="${badge.name}">
+      <span class="badge-tooltip">${badge.name}</span>
+    `
+    return container
+  } else {
+    const badgeEl = document.createElement("span")
+    badgeEl.className = `badge ${badge.class}`
+    badgeEl.textContent = badge.name
+    return badgeEl
+  }
 }
 
 function updateProfilePage() {
@@ -502,13 +986,11 @@ function updateProfilePage() {
   document.getElementById("profileUsername").textContent = currentUser.username
   document.getElementById("profileBio").textContent = currentUser.bio || "Sem bio definida."
 
-  // Banner
   const profileBanner = document.getElementById("profileBanner")
   if (currentUser.banner) {
     profileBanner.style.backgroundImage = `url(${currentUser.banner})`
   }
 
-  // Data de criação
   const createdAt = new Date(currentUser.createdAt)
   const formattedDate = createdAt.toLocaleDateString("pt-BR", {
     day: "2-digit",
@@ -517,15 +999,12 @@ function updateProfilePage() {
   })
   document.getElementById("profileMemberSince").textContent = `Membro desde: ${formattedDate}`
 
-  // Badges
   const badgesContainer = document.getElementById("profileBadges")
   badgesContainer.innerHTML = ""
 
   const badges = getUserBadges(currentUser.username)
   badges.forEach((badge) => {
-    const badgeEl = document.createElement("span")
-    badgeEl.className = `badge ${badge.class}`
-    badgeEl.textContent = badge.name
+    const badgeEl = createBadgeElement(badge)
     badgesContainer.appendChild(badgeEl)
   })
 }
@@ -539,11 +1018,9 @@ function initContactForm() {
   contactForm.addEventListener("submit", async (e) => {
     e.preventDefault()
 
-    // Desabilita botão
     submitBtn.disabled = true
     submitBtn.innerHTML = "<span>Enviando...</span>"
 
-    // Coleta dados
     const formData = {
       firstName: document.getElementById("firstName").value,
       lastName: document.getElementById("lastName").value,
@@ -556,7 +1033,6 @@ function initContactForm() {
       sector: document.getElementById("sector").value,
     }
 
-    // Traduz motivo
     const reasonTranslations = {
       partnership: "Parceria",
       support: "Suporte Técnico",
@@ -567,75 +1043,42 @@ function initContactForm() {
       other: "Outro",
     }
 
-    // Traduz meio de contato
     const contactMethodTranslations = {
       email: "Email",
       phone: "Número de Telefone",
       discord: "Discord",
     }
 
-    // Prepara embed para Discord
     const embed = {
       embeds: [
         {
           title: "📩 Nova Mensagem de Contato",
-          color: 16777215, // Branco
+          color: 16777215,
           fields: [
-            {
-              name: "👤 Nome Completo",
-              value: `${formData.firstName} ${formData.lastName}`,
-              inline: true,
-            },
-            {
-              name: "📧 Email",
-              value: formData.email,
-              inline: true,
-            },
-            {
-              name: "🏢 Setor",
-              value: formData.sector,
-              inline: true,
-            },
-            {
-              name: "📋 Assunto",
-              value: formData.subject,
-              inline: false,
-            },
-            {
-              name: "🎯 Motivo",
-              value: reasonTranslations[formData.reason] || formData.reason,
-              inline: true,
-            },
+            { name: "👤 Nome Completo", value: `${formData.firstName} ${formData.lastName}`, inline: true },
+            { name: "📧 Email", value: formData.email, inline: true },
+            { name: "🏢 Setor", value: formData.sector, inline: true },
+            { name: "📋 Assunto", value: formData.subject, inline: false },
+            { name: "🎯 Motivo", value: reasonTranslations[formData.reason] || formData.reason, inline: true },
             {
               name: "📱 Meio de Contato",
               value: `${contactMethodTranslations[formData.contactMethod]}: ${formData.contactInfo}`,
               inline: true,
             },
-            {
-              name: "💬 Mensagem",
-              value: formData.message,
-              inline: false,
-            },
+            { name: "💬 Mensagem", value: formData.message, inline: false },
           ],
-          footer: {
-            text: "EclipseByte Studios - Sistema de Contato",
-          },
+          footer: { text: "EclipseByte Studios - Sistema de Contato" },
           timestamp: new Date().toISOString(),
         },
       ],
     }
 
     try {
-      const response = await fetch(
-        "https://discord.com/api/webhooks/1459229422220611584/hOdCqWKLZnGiEsbIJCJw6jQtjrAxZuGBwydgwTQ_PVwx7Ki9vpzKTIDoSkwwVCMGH3co",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(embed),
-        },
-      )
+      const response = await fetch(WEBHOOK_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(embed),
+      })
 
       if (response.ok) {
         formStatus.className = "form-status success"
@@ -653,7 +1096,6 @@ function initContactForm() {
       showToast("Erro ao enviar mensagem", "error")
     }
 
-    // Reabilita botão
     submitBtn.disabled = false
     submitBtn.innerHTML = `<span>Enviar Mensagem</span>
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -661,76 +1103,85 @@ function initContactForm() {
                 <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
             </svg>`
 
-    // Esconde mensagem após 5 segundos
     setTimeout(() => {
       formStatus.classList.add("hidden")
     }, 5000)
   })
 }
 
-// ==================== BOTÕES DE COPIAR ====================
-function initCopyButtons() {
-  const copyButtons = document.querySelectorAll(".copy-btn")
-
-  copyButtons.forEach((btn) => {
-    btn.addEventListener("click", async () => {
-      const script = btn.getAttribute("data-script")
-
-      try {
-        await navigator.clipboard.writeText(script)
-        btn.classList.add("copied")
-        btn.querySelector("span").textContent = "Copiado!"
-        showToast("Script copiado para a área de transferência!", "success")
-
-        setTimeout(() => {
-          btn.classList.remove("copied")
-          btn.querySelector("span").textContent = "Copiar Script"
-        }, 2000)
-      } catch (error) {
-        showToast("Erro ao copiar script", "error")
-      }
-    })
-  })
-}
-
 // ==================== NOTIFICAÇÕES ====================
 function initNotifications() {
-  const notificationList = document.getElementById("notificationList")
+  loadNotifications()
+}
 
-  // Notificações mockadas
-  const notifications = [
+function loadNotifications() {
+  const notificationList = document.getElementById("notificationList")
+  const currentUser = getCurrentUser()
+
+  // Default notifications (changelogs)
+  const defaultNotifications = [
     {
-      title: "Nova atualização do site",
-      message: "Confira as novas funcionalidades!",
-      icon: "🔔",
-      time: "Agora",
+      title: "📢 Changelog v2.0",
+      message: "Nova página de Projetos com Havana Roleplay! Sistema de contas melhorado.",
+      icon: "🆕",
+      time: "Hoje",
+      unread: true,
     },
     {
-      title: "Novo script em breve",
-      message: "Fique ligado para novos lançamentos.",
-      icon: "💀",
-      time: "1h atrás",
+      title: "🎮 Havana Roleplay",
+      message: "Nosso novo projeto principal está disponível! Confira na aba Projetos.",
+      icon: "🎮",
+      time: "Hoje",
+      unread: true,
     },
     {
-      title: "Bem-vindo ao Grupo EclipseByte",
+      title: "🔐 Sistema de Segurança",
+      message: "Novo sistema de recuperação de senha implementado.",
+      icon: "🔒",
+      time: "Recente",
+      unread: false,
+    },
+    {
+      title: "👥 Grupo Roblox",
+      message: "Entre no nosso grupo oficial do Roblox! Link disponível na aba Links.",
+      icon: "👥",
+      time: "1 dia atrás",
+      unread: false,
+    },
+    {
+      title: "Bem-vindo ao EclipseByte",
       message: "Obrigado por fazer parte da nossa comunidade!",
       icon: "🎉",
-      time: "2h atrás",
+      time: "Sempre",
+      unread: false,
     },
   ]
 
-  notificationList.innerHTML = notifications
+  // Get user-specific notifications
+  let userNotifications = []
+  if (currentUser) {
+    userNotifications = JSON.parse(localStorage.getItem(`eclipsebyte_notifications_${currentUser.username}`) || "[]")
+  }
+
+  const allNotifications = [...userNotifications, ...defaultNotifications]
+
+  // Update badge count
+  const unreadCount = allNotifications.filter((n) => n.unread).length
+  const notifBadge = document.getElementById("notifBadge")
+  notifBadge.textContent = unreadCount > 0 ? unreadCount : allNotifications.length
+
+  notificationList.innerHTML = allNotifications
     .map(
       (notif) => `
-        <div class="notification-item">
-            <div class="notification-icon">${notif.icon}</div>
-            <div class="notification-content">
-                <h4>${notif.title}</h4>
-                <p>${notif.message}</p>
-                <span style="font-size: 0.7rem; color: var(--color-gray-600);">${notif.time}</span>
-            </div>
-        </div>
-    `,
+    <div class="notification-item ${notif.unread ? "unread" : ""}">
+      <div class="notification-icon">${notif.icon}</div>
+      <div class="notification-content">
+        <h4>${notif.title}</h4>
+        <p>${notif.message}</p>
+        <span class="notification-time">${notif.time}</span>
+      </div>
+    </div>
+  `,
     )
     .join("")
 }
@@ -757,7 +1208,6 @@ function updateYear() {
 
 // ==================== TECLAS DE ATALHO ====================
 document.addEventListener("keydown", (e) => {
-  // ESC fecha modais e painéis
   if (e.key === "Escape") {
     document.querySelectorAll(".modal-overlay").forEach((m) => m.classList.add("hidden"))
     closePanels()
