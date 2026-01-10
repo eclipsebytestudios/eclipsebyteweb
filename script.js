@@ -1,6 +1,4 @@
-// ═══════════════════════════════════════════════════════════════
-// NAVEGAÇÃO ENTRE ABAS
-// ═══════════════════════════════════════════════════════════════
+// Navegação entre abas
 const navLinks = document.querySelectorAll(".nav-link")
 const tabContents = document.querySelectorAll(".tab-content")
 
@@ -9,47 +7,35 @@ navLinks.forEach((link) => {
     e.preventDefault()
     const targetTab = link.getAttribute("data-tab")
 
-    // Remove active class de todos os links e abas
     navLinks.forEach((l) => l.classList.remove("active"))
     tabContents.forEach((tab) => tab.classList.remove("active"))
 
-    // Adiciona active class ao link e aba clicados
     link.classList.add("active")
     document.getElementById(targetTab).classList.add("active")
 
-    // Scroll para o topo
     window.scrollTo({ top: 0, behavior: "smooth" })
   })
 })
 
-// ═══════════════════════════════════════════════════════════════
-// COPIAR SCRIPT
-// ═══════════════════════════════════════════════════════════════
+// Copiar script
 function copyScript(scriptId) {
   const scriptElement = document.getElementById(scriptId)
   const scriptText = scriptElement.textContent
 
-  navigator.clipboard
-    .writeText(scriptText)
-    .then(() => {
-      const btn = event.target
-      const originalText = btn.textContent
-      btn.textContent = "Copiado!"
-      btn.style.backgroundColor = "#00ff00"
+  navigator.clipboard.writeText(scriptText).then(() => {
+    const btn = event.target
+    const originalText = btn.textContent
+    btn.textContent = "Copiado!"
+    btn.style.backgroundColor = "#00ff00"
 
-      setTimeout(() => {
-        btn.textContent = originalText
-        btn.style.backgroundColor = ""
-      }, 2000)
-    })
-    .catch((err) => {
-      alert("Erro ao copiar: " + err)
-    })
+    setTimeout(() => {
+      btn.textContent = originalText
+      btn.style.backgroundColor = ""
+    }, 2000)
+  })
 }
 
-// ═══════════════════════════════════════════════════════════════
-// SISTEMA DE AUTENTICAÇÃO (LOCALSTORAGE)
-// ═══════════════════════════════════════════════════════════════
+// Sistema de autenticação
 const authBtn = document.getElementById("authBtn")
 const authModal = document.getElementById("authModal")
 const closeAuth = document.getElementById("closeAuth")
@@ -61,7 +47,6 @@ const profileModal = document.getElementById("profileModal")
 const closeProfile = document.getElementById("closeProfile")
 const logoutBtn = document.getElementById("logoutBtn")
 
-// Verificar se usuário está logado ao carregar a página
 window.addEventListener("DOMContentLoaded", () => {
   checkAuthStatus()
   loadNotifications()
@@ -76,7 +61,6 @@ function checkAuthStatus() {
   }
 }
 
-// Abrir modal de auth
 authBtn.addEventListener("click", () => {
   const currentUser = localStorage.getItem("currentUser")
   if (!currentUser) {
@@ -84,12 +68,10 @@ authBtn.addEventListener("click", () => {
   }
 })
 
-// Fechar modal de auth
 closeAuth.addEventListener("click", () => {
   authModal.classList.remove("active")
 })
 
-// Alternar entre Sign In e Sign Up
 switchToSignUp.addEventListener("click", (e) => {
   e.preventDefault()
   signInForm.classList.add("hidden")
@@ -104,7 +86,6 @@ switchToSignIn.addEventListener("click", (e) => {
   document.getElementById("authModalTitle").textContent = "Entrar"
 })
 
-// Sign In
 signInForm.addEventListener("submit", (e) => {
   e.preventDefault()
 
@@ -125,7 +106,6 @@ signInForm.addEventListener("submit", (e) => {
   }
 })
 
-// Sign Up
 signUpForm.addEventListener("submit", (e) => {
   e.preventDefault()
 
@@ -153,7 +133,6 @@ signUpForm.addEventListener("submit", (e) => {
     return
   }
 
-  // Processar foto de perfil
   if (profilePicInput.files[0]) {
     const reader = new FileReader()
     reader.onload = (event) => {
@@ -197,7 +176,6 @@ signUpForm.addEventListener("submit", (e) => {
   }
 })
 
-// Mostrar perfil
 function showProfile(user) {
   document.getElementById("profileUsername").textContent = user.username
   document.getElementById("profileBio").textContent = user.bio || "Sem bio definida"
@@ -206,10 +184,7 @@ function showProfile(user) {
   if (user.profilePic) {
     avatar.src = user.profilePic
   } else {
-    avatar.src =
-      'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="120" height="120"%3E%3Crect fill="%23333" width="120" height="120"/%3E%3Ctext fill="%23fff" x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-size="48"%3E' +
-      user.username.charAt(0).toUpperCase() +
-      "%3C/text%3E%3C/svg%3E"
+    avatar.src = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Crect fill='%23333' width='120' height='120'/%3E%3Ctext fill='%23fff' x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-size='48'%3E${user.username.charAt(0).toUpperCase()}%3C/text%3E%3C/svg%3E`
   }
 
   const banner = document.getElementById("profileBanner")
@@ -219,11 +194,9 @@ function showProfile(user) {
     banner.style.backgroundPosition = "center"
   }
 
-  // Badges
   const badgesContainer = document.getElementById("profileBadges")
   badgesContainer.innerHTML = ""
 
-  // Badges especiais para silva777only
   if (user.username === "silva777only") {
     badgesContainer.innerHTML += '<span class="badge developer">👨‍💻 Desenvolvedor</span>'
     badgesContainer.innerHTML += '<span class="badge owner">👑 Owner</span>'
@@ -232,12 +205,10 @@ function showProfile(user) {
   profileModal.classList.add("active")
 }
 
-// Fechar perfil
 closeProfile.addEventListener("click", () => {
   profileModal.classList.remove("active")
 })
 
-// Logout
 logoutBtn.addEventListener("click", () => {
   localStorage.removeItem("currentUser")
   authBtn.textContent = "Sign In / Sign Up"
@@ -245,9 +216,7 @@ logoutBtn.addEventListener("click", () => {
   profileModal.classList.remove("active")
 })
 
-// ═══════════════════════════════════════════════════════════════
-// CONFIGURAÇÕES
-// ═══════════════════════════════════════════════════════════════
+// Configurações
 const settingsBtn = document.getElementById("settingsBtn")
 const settingsModal = document.getElementById("settingsModal")
 const closeSettings = document.getElementById("closeSettings")
@@ -280,10 +249,8 @@ saveSettingsBtn.addEventListener("click", () => {
   const users = JSON.parse(localStorage.getItem("users") || "[]")
   const userIndex = users.findIndex((u) => u.username === user.username)
 
-  // Atualizar bio
   user.bio = bioInput.value
 
-  // Processar nova foto de perfil
   if (profilePicInput.files[0]) {
     const reader = new FileReader()
     reader.onload = (event) => {
@@ -293,7 +260,6 @@ saveSettingsBtn.addEventListener("click", () => {
     reader.readAsDataURL(profilePicInput.files[0])
   }
 
-  // Processar novo banner
   if (bannerInput.files[0]) {
     const reader = new FileReader()
     reader.onload = (event) => {
@@ -303,7 +269,6 @@ saveSettingsBtn.addEventListener("click", () => {
     reader.readAsDataURL(bannerInput.files[0])
   }
 
-  // Se não houver arquivos novos, apenas atualizar
   if (!profilePicInput.files[0] && !bannerInput.files[0]) {
     updateUserData(user, users, userIndex)
   }
@@ -317,9 +282,7 @@ function updateUserData(user, users, userIndex) {
   alert("Configurações salvas com sucesso!")
 }
 
-// ═══════════════════════════════════════════════════════════════
-// NOTIFICAÇÕES
-// ═══════════════════════════════════════════════════════════════
+// Notificações
 const notificationsBtn = document.getElementById("notificationsBtn")
 const notificationsPanel = document.getElementById("notificationsPanel")
 const closeNotifications = document.getElementById("closeNotifications")
@@ -357,17 +320,15 @@ function loadNotifications() {
     const notifElement = document.createElement("div")
     notifElement.className = "notification-item"
     notifElement.innerHTML = `
-            <h4>${notif.title}</h4>
-            <p>${notif.message}</p>
-            <small>${notif.time}</small>
-        `
+      <h4>${notif.title}</h4>
+      <p>${notif.message}</p>
+      <small>${notif.time}</small>
+    `
     notificationsList.appendChild(notifElement)
   })
 }
 
-// ═══════════════════════════════════════════════════════════════
-// FORMULÁRIO DE CONTATO
-// ═══════════════════════════════════════════════════════════════
+// Formulário de contato
 const contactForm = document.getElementById("contactForm")
 const formMessage = document.getElementById("formMessage")
 
@@ -435,24 +396,13 @@ contactForm.addEventListener("submit", async (e) => {
   }
 })
 
-// ═══════════════════════════════════════════════════════════════
-// FECHAR MODAIS AO CLICAR FORA
-// ═══════════════════════════════════════════════════════════════
+// Fechar modais ao clicar fora
 window.addEventListener("click", (e) => {
-  if (e.target === authModal) {
-    authModal.classList.remove("active")
-  }
-  if (e.target === profileModal) {
-    profileModal.classList.remove("active")
-  }
-  if (e.target === settingsModal) {
-    settingsModal.classList.remove("active")
-  }
+  if (e.target === authModal) authModal.classList.remove("active")
+  if (e.target === profileModal) profileModal.classList.remove("active")
+  if (e.target === settingsModal) settingsModal.classList.remove("active")
 })
 
-// ═══════════════════════════════════════════════════════════════
-// FECHAR PAINEL DE NOTIFICAÇÕES AO CLICAR FORA
-// ═══════════════════════════════════════════════════════════════
 document.addEventListener("click", (e) => {
   if (
     !notificationsPanel.contains(e.target) &&
