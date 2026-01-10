@@ -1,765 +1,464 @@
-/* ===========================================
-   ECLIPSEBYTE STUDIOS - JAVASCRIPT
-   Sistema completo de navegação, autenticação
-   e funcionalidades do site
-   =========================================== */
+// ═══════════════════════════════════════════════════════════════
+// NAVEGAÇÃO ENTRE ABAS
+// ═══════════════════════════════════════════════════════════════
+const navLinks = document.querySelectorAll(".nav-link")
+const tabContents = document.querySelectorAll(".tab-content")
 
-// ==================== INICIALIZAÇÃO ====================
-document.addEventListener("DOMContentLoaded", () => {
-  initNavigation()
-  initScrollEffects()
-  initModals()
-  initPanels()
-  initAuth()
-  initContactForm()
-  initCopyButtons()
-  initNotifications()
-  updateYear()
+navLinks.forEach((link) => {
+  link.addEventListener("click", (e) => {
+    e.preventDefault()
+    const targetTab = link.getAttribute("data-tab")
+
+    // Remove active class de todos os links e abas
+    navLinks.forEach((l) => l.classList.remove("active"))
+    tabContents.forEach((tab) => tab.classList.remove("active"))
+
+    // Adiciona active class ao link e aba clicados
+    link.classList.add("active")
+    document.getElementById(targetTab).classList.add("active")
+
+    // Scroll para o topo
+    window.scrollTo({ top: 0, behavior: "smooth" })
+  })
 })
 
-// ==================== NAVEGAÇÃO ====================
-function initNavigation() {
-  const navLinks = document.querySelectorAll(".nav-link")
-  const pages = document.querySelectorAll(".page")
-  const mobileMenuBtn = document.getElementById("mobileMenuBtn")
-  const navbarMenu = document.getElementById("navbarMenu")
+// ═══════════════════════════════════════════════════════════════
+// COPIAR SCRIPT
+// ═══════════════════════════════════════════════════════════════
+function copyScript(scriptId) {
+  const scriptElement = document.getElementById(scriptId)
+  const scriptText = scriptElement.textContent
 
-  // Navegação entre páginas
-  navLinks.forEach((link) => {
-    link.addEventListener("click", (e) => {
-      e.preventDefault()
-      const targetPage = link.getAttribute("data-page")
+  navigator.clipboard
+    .writeText(scriptText)
+    .then(() => {
+      const btn = event.target
+      const originalText = btn.textContent
+      btn.textContent = "Copiado!"
+      btn.style.backgroundColor = "#00ff00"
 
-      // Atualiza links ativos
-      navLinks.forEach((l) => l.classList.remove("active"))
-      link.classList.add("active")
-
-      // Mostra página correspondente
-      pages.forEach((page) => {
-        page.classList.remove("active")
-        if (page.id === targetPage) {
-          page.classList.add("active")
-          // Reinicia animações
-          restartAnimations(page)
-        }
-      })
-
-      // Fecha menu mobile
-      navbarMenu.classList.remove("active")
-      mobileMenuBtn.classList.remove("active")
-
-      // Scroll para o topo
-      window.scrollTo({ top: 0, behavior: "smooth" })
+      setTimeout(() => {
+        btn.textContent = originalText
+        btn.style.backgroundColor = ""
+      }, 2000)
     })
-  })
-
-  // Menu mobile
-  mobileMenuBtn.addEventListener("click", () => {
-    mobileMenuBtn.classList.toggle("active")
-    navbarMenu.classList.toggle("active")
-  })
-
-  // Botão de perfil
-  const profileBtn = document.getElementById("profileBtn")
-  if (profileBtn) {
-    profileBtn.addEventListener("click", () => {
-      showProfilePage()
+    .catch((err) => {
+      alert("Erro ao copiar: " + err)
     })
-  }
 }
 
-// Função para mostrar página de perfil
-function showProfilePage() {
-  const pages = document.querySelectorAll(".page")
-  const navLinks = document.querySelectorAll(".nav-link")
-
-  navLinks.forEach((l) => l.classList.remove("active"))
-  pages.forEach((page) => page.classList.remove("active"))
-
-  document.getElementById("profile").classList.add("active")
-  updateProfilePage()
-  window.scrollTo({ top: 0, behavior: "smooth" })
-}
-
-// Reinicia animações de uma página
-function restartAnimations(page) {
-  const animatedElements = page.querySelectorAll('[class*="animate-"]')
-  animatedElements.forEach((el) => {
-    el.style.animation = "none"
-    el.offsetHeight // Trigger reflow
-    el.style.animation = null
-  })
-}
-
-// ==================== EFEITOS DE SCROLL ====================
-function initScrollEffects() {
-  const navbar = document.getElementById("navbar")
-
-  window.addEventListener("scroll", () => {
-    if (window.scrollY > 50) {
-      navbar.classList.add("scrolled")
-    } else {
-      navbar.classList.remove("scrolled")
-    }
-  })
-}
-
-// ==================== MODAIS ====================
-function initModals() {
-  // Sign In Modal
-  const signinBtn = document.getElementById("signinBtn")
-  const signinModal = document.getElementById("signinModal")
-  const closeSignin = document.getElementById("closeSignin")
-
-  // Sign Up Modal
-  const signupBtn = document.getElementById("signupBtn")
-  const signupModal = document.getElementById("signupModal")
-  const closeSignup = document.getElementById("closeSignup")
-
-  // Switch entre modais
-  const switchToSignup = document.getElementById("switchToSignup")
-  const switchToSignin = document.getElementById("switchToSignin")
-
-  // Abrir Sign In
-  signinBtn.addEventListener("click", () => {
-    signinModal.classList.remove("hidden")
-  })
-
-  // Fechar Sign In
-  closeSignin.addEventListener("click", () => {
-    signinModal.classList.add("hidden")
-  })
-
-  // Abrir Sign Up
-  signupBtn.addEventListener("click", () => {
-    signupModal.classList.remove("hidden")
-  })
-
-  // Fechar Sign Up
-  closeSignup.addEventListener("click", () => {
-    signupModal.classList.add("hidden")
-  })
-
-  // Switch para Sign Up
-  switchToSignup.addEventListener("click", (e) => {
-    e.preventDefault()
-    signinModal.classList.add("hidden")
-    signupModal.classList.remove("hidden")
-  })
-
-  // Switch para Sign In
-  switchToSignin.addEventListener("click", (e) => {
-    e.preventDefault()
-    signupModal.classList.add("hidden")
-    signinModal.classList.remove("hidden")
-  })
-
-  // Fechar ao clicar fora
-  ;[signinModal, signupModal].forEach((modal) => {
-    modal.addEventListener("click", (e) => {
-      if (e.target === modal) {
-        modal.classList.add("hidden")
-      }
-    })
-  })
-
-  // Preview de avatar no signup
-  const signupAvatar = document.getElementById("signupAvatar")
-  const avatarPreview = document.getElementById("avatarPreview")
-  const avatarPreviewImg = document.getElementById("avatarPreviewImg")
-
-  signupAvatar.addEventListener("change", (e) => {
-    const file = e.target.files[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onload = (event) => {
-        avatarPreviewImg.src = event.target.result
-        avatarPreview.classList.remove("hidden")
-      }
-      reader.readAsDataURL(file)
-    }
-  })
-}
-
-// ==================== PAINÉIS LATERAIS ====================
-function initPanels() {
-  const notificationBtn = document.getElementById("notificationBtn")
-  const notificationPanel = document.getElementById("notificationPanel")
-  const closeNotifications = document.getElementById("closeNotifications")
-
-  const settingsBtn = document.getElementById("settingsBtn")
-  const settingsPanel = document.getElementById("settingsPanel")
-  const closeSettings = document.getElementById("closeSettings")
-
-  const panelOverlay = document.getElementById("panelOverlay")
-
-  // Abrir notificações
-  notificationBtn.addEventListener("click", () => {
-    closePanels()
-    notificationPanel.classList.remove("hidden")
-    notificationPanel.classList.add("active")
-    panelOverlay.classList.remove("hidden")
-  })
-
-  // Fechar notificações
-  closeNotifications.addEventListener("click", closePanels)
-
-  // Abrir configurações
-  settingsBtn.addEventListener("click", () => {
-    const currentUser = getCurrentUser()
-    if (!currentUser) {
-      showToast("Faça login para acessar as configurações", "error")
-      return
-    }
-    closePanels()
-    settingsPanel.classList.remove("hidden")
-    settingsPanel.classList.add("active")
-    panelOverlay.classList.remove("hidden")
-    loadSettingsData()
-  })
-
-  // Fechar configurações
-  closeSettings.addEventListener("click", closePanels)
-
-  // Fechar ao clicar no overlay
-  panelOverlay.addEventListener("click", closePanels)
-
-  // Configurações de avatar
-  const changeAvatar = document.getElementById("changeAvatar")
-  changeAvatar.addEventListener("change", (e) => {
-    const file = e.target.files[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onload = (event) => {
-        document.getElementById("settingsAvatar").src = event.target.result
-      }
-      reader.readAsDataURL(file)
-    }
-  })
-
-  // Configurações de banner
-  const changeBanner = document.getElementById("changeBanner")
-  changeBanner.addEventListener("change", (e) => {
-    const file = e.target.files[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onload = (event) => {
-        document.getElementById("bannerPreview").style.backgroundImage = `url(${event.target.result})`
-      }
-      reader.readAsDataURL(file)
-    }
-  })
-
-  // Formulário de configurações
-  const settingsForm = document.getElementById("settingsForm")
-  settingsForm.addEventListener("submit", (e) => {
-    e.preventDefault()
-    saveSettings()
-  })
-
-  // Logout
-  const logoutBtn = document.getElementById("logoutBtn")
-  logoutBtn.addEventListener("click", () => {
-    logout()
-    closePanels()
-  })
-}
-
-function closePanels() {
-  const panels = document.querySelectorAll(".side-panel")
-  const overlay = document.getElementById("panelOverlay")
-
-  panels.forEach((panel) => {
-    panel.classList.remove("active")
-    setTimeout(() => {
-      if (!panel.classList.contains("active")) {
-        panel.classList.add("hidden")
-      }
-    }, 300)
-  })
-
-  overlay.classList.add("hidden")
-}
-
-function loadSettingsData() {
-  const currentUser = getCurrentUser()
-  if (!currentUser) return
-
-  document.getElementById("settingsAvatar").src = currentUser.avatar || generateDefaultAvatar(currentUser.username)
-  document.getElementById("bannerPreview").style.backgroundImage = currentUser.banner
-    ? `url(${currentUser.banner})`
-    : ""
-  document.getElementById("editBio").value = currentUser.bio || ""
-
-  // Emblemas
-  const badgesContainer = document.getElementById("settingsBadges")
-  badgesContainer.innerHTML = ""
-
-  const badges = getUserBadges(currentUser.username)
-  badges.forEach((badge) => {
-    const badgeEl = document.createElement("span")
-    badgeEl.className = `badge ${badge.class}`
-    badgeEl.textContent = badge.name
-    badgesContainer.appendChild(badgeEl)
-  })
-}
-
-function saveSettings() {
-  const currentUser = getCurrentUser()
-  if (!currentUser) return
-
-  const users = JSON.parse(localStorage.getItem("eclipsebyte_users") || "[]")
-  const userIndex = users.findIndex((u) => u.username === currentUser.username)
-
-  if (userIndex === -1) return
-
-  // Atualiza bio
-  users[userIndex].bio = document.getElementById("editBio").value
-
-  // Atualiza avatar se foi alterado
-  const avatarImg = document.getElementById("settingsAvatar")
-  if (avatarImg.src && !avatarImg.src.includes("placeholder")) {
-    users[userIndex].avatar = avatarImg.src
-  }
-
-  // Atualiza banner se foi alterado
-  const bannerPreview = document.getElementById("bannerPreview")
-  const bannerBg = bannerPreview.style.backgroundImage
-  if (bannerBg && bannerBg !== "none") {
-    users[userIndex].banner = bannerBg.replace(/^url$$['"]?/, "").replace(/['"]?$$$/, "")
-  }
-
-  localStorage.setItem("eclipsebyte_users", JSON.stringify(users))
-  localStorage.setItem("eclipsebyte_current_user", JSON.stringify(users[userIndex]))
-
-  updateNavbarProfile()
-  showToast("Configurações salvas com sucesso!", "success")
-  closePanels()
-}
-
-// ==================== SISTEMA DE AUTENTICAÇÃO ====================
-function initAuth() {
-  const signinForm = document.getElementById("signinForm")
-  const signupForm = document.getElementById("signupForm")
-
-  // Sign In
-  signinForm.addEventListener("submit", (e) => {
-    e.preventDefault()
-
-    const usernameOrEmail = document.getElementById("signinUsername").value
-    const password = document.getElementById("signinPassword").value
-
-    const users = JSON.parse(localStorage.getItem("eclipsebyte_users") || "[]")
-    const user = users.find(
-      (u) => (u.username === usernameOrEmail || u.email === usernameOrEmail) && u.password === password,
-    )
-
-    if (user) {
-      localStorage.setItem("eclipsebyte_current_user", JSON.stringify(user))
-      document.getElementById("signinModal").classList.add("hidden")
-      updateNavbarProfile()
-      showToast(`Bem-vindo de volta, ${user.username}!`, "success")
-      signinForm.reset()
-    } else {
-      showToast("Credenciais inválidas", "error")
-    }
-  })
-
-  // Sign Up
-  signupForm.addEventListener("submit", (e) => {
-    e.preventDefault()
-
-    const username = document.getElementById("signupUsername").value
-    const email = document.getElementById("signupEmail").value
-    const password = document.getElementById("signupPassword").value
-    const bio = document.getElementById("signupBio").value
-    const avatarInput = document.getElementById("signupAvatar")
-
-    const users = JSON.parse(localStorage.getItem("eclipsebyte_users") || "[]")
-
-    // Verifica se usuário já existe
-    if (users.find((u) => u.username === username)) {
-      showToast("Este username já está em uso", "error")
-      return
-    }
-
-    if (users.find((u) => u.email === email)) {
-      showToast("Este email já está cadastrado", "error")
-      return
-    }
-
-    // Processa avatar
-    let avatar = generateDefaultAvatar(username)
-    if (avatarInput.files[0]) {
-      const reader = new FileReader()
-      reader.onload = (event) => {
-        avatar = event.target.result
-        completeSignup(username, email, password, bio, avatar)
-      }
-      reader.readAsDataURL(avatarInput.files[0])
-    } else {
-      completeSignup(username, email, password, bio, avatar)
-    }
-  })
-
-  // Verifica se há usuário logado
-  updateNavbarProfile()
-}
-
-function completeSignup(username, email, password, bio, avatar) {
-  const users = JSON.parse(localStorage.getItem("eclipsebyte_users") || "[]")
-
-  const newUser = {
-    username,
-    email,
-    password,
-    bio,
-    avatar,
-    banner: null,
-    createdAt: new Date().toISOString(),
-  }
-
-  users.push(newUser)
-  localStorage.setItem("eclipsebyte_users", JSON.stringify(users))
-  localStorage.setItem("eclipsebyte_current_user", JSON.stringify(newUser))
-
-  document.getElementById("signupModal").classList.add("hidden")
-  document.getElementById("signupForm").reset()
-  document.getElementById("avatarPreview").classList.add("hidden")
-
-  updateNavbarProfile()
-  showToast(`Conta criada com sucesso! Bem-vindo, ${username}!`, "success")
-}
-
-function getCurrentUser() {
-  return JSON.parse(localStorage.getItem("eclipsebyte_current_user"))
-}
-
-function updateNavbarProfile() {
-  const currentUser = getCurrentUser()
-  const authButtons = document.getElementById("authButtons")
-  const profileMenu = document.getElementById("profileMenu")
-  const navAvatar = document.getElementById("navAvatar")
-  const navUsername = document.getElementById("navUsername")
-
+// ═══════════════════════════════════════════════════════════════
+// SISTEMA DE AUTENTICAÇÃO (LOCALSTORAGE)
+// ═══════════════════════════════════════════════════════════════
+const authBtn = document.getElementById("authBtn")
+const authModal = document.getElementById("authModal")
+const closeAuth = document.getElementById("closeAuth")
+const signInForm = document.getElementById("signInForm")
+const signUpForm = document.getElementById("signUpForm")
+const switchToSignUp = document.getElementById("switchToSignUp")
+const switchToSignIn = document.getElementById("switchToSignIn")
+const profileModal = document.getElementById("profileModal")
+const closeProfile = document.getElementById("closeProfile")
+const logoutBtn = document.getElementById("logoutBtn")
+
+// Verificar se usuário está logado ao carregar a página
+window.addEventListener("DOMContentLoaded", () => {
+  checkAuthStatus()
+  loadNotifications()
+})
+
+function checkAuthStatus() {
+  const currentUser = localStorage.getItem("currentUser")
   if (currentUser) {
-    authButtons.classList.add("hidden")
-    profileMenu.classList.remove("hidden")
-    navAvatar.src = currentUser.avatar || generateDefaultAvatar(currentUser.username)
-    navUsername.textContent = currentUser.username
+    const user = JSON.parse(currentUser)
+    authBtn.textContent = user.username
+    authBtn.onclick = () => showProfile(user)
+  }
+}
+
+// Abrir modal de auth
+authBtn.addEventListener("click", () => {
+  const currentUser = localStorage.getItem("currentUser")
+  if (!currentUser) {
+    authModal.classList.add("active")
+  }
+})
+
+// Fechar modal de auth
+closeAuth.addEventListener("click", () => {
+  authModal.classList.remove("active")
+})
+
+// Alternar entre Sign In e Sign Up
+switchToSignUp.addEventListener("click", (e) => {
+  e.preventDefault()
+  signInForm.classList.add("hidden")
+  signUpForm.classList.remove("hidden")
+  document.getElementById("authModalTitle").textContent = "Criar Conta"
+})
+
+switchToSignIn.addEventListener("click", (e) => {
+  e.preventDefault()
+  signUpForm.classList.add("hidden")
+  signInForm.classList.remove("hidden")
+  document.getElementById("authModalTitle").textContent = "Entrar"
+})
+
+// Sign In
+signInForm.addEventListener("submit", (e) => {
+  e.preventDefault()
+
+  const username = document.getElementById("signInUsername").value
+  const password = document.getElementById("signInPassword").value
+
+  const users = JSON.parse(localStorage.getItem("users") || "[]")
+  const user = users.find((u) => (u.username === username || u.email === username) && u.password === password)
+
+  if (user) {
+    localStorage.setItem("currentUser", JSON.stringify(user))
+    authModal.classList.remove("active")
+    authBtn.textContent = user.username
+    authBtn.onclick = () => showProfile(user)
+    signInForm.reset()
   } else {
-    authButtons.classList.remove("hidden")
-    profileMenu.classList.add("hidden")
+    alert("Credenciais inválidas!")
   }
-}
+})
 
-function logout() {
-  localStorage.removeItem("eclipsebyte_current_user")
-  updateNavbarProfile()
-  showToast("Você saiu da sua conta", "success")
+// Sign Up
+signUpForm.addEventListener("submit", (e) => {
+  e.preventDefault()
 
-  // Volta para Home
-  const navLinks = document.querySelectorAll(".nav-link")
-  const pages = document.querySelectorAll(".page")
+  const username = document.getElementById("signUpUsername").value
+  const email = document.getElementById("signUpEmail").value
+  const password = document.getElementById("signUpPassword").value
+  const confirmPassword = document.getElementById("signUpConfirmPassword").value
+  const bio = document.getElementById("signUpBio").value
+  const profilePicInput = document.getElementById("signUpProfilePic")
 
-  navLinks.forEach((l) => l.classList.remove("active"))
-  document.querySelector('[data-page="home"]').classList.add("active")
-
-  pages.forEach((p) => p.classList.remove("active"))
-  document.getElementById("home").classList.add("active")
-}
-
-function generateDefaultAvatar(username) {
-  // Gera um avatar SVG simples com a inicial do usuário
-  const initial = username.charAt(0).toUpperCase()
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">
-        <rect width="100" height="100" fill="#262626"/>
-        <text x="50" y="50" font-family="Arial, sans-serif" font-size="40" fill="#ffffff" text-anchor="middle" dominant-baseline="central">${initial}</text>
-    </svg>`
-  return "data:image/svg+xml;base64," + btoa(svg)
-}
-
-function getUserBadges(username) {
-  const badges = []
-
-  // Badges especiais para silva777only
-  if (username.toLowerCase() === "silva777only") {
-    badges.push({ name: "Desenvolvedor", class: "developer" })
-    badges.push({ name: "Owner", class: "owner" })
+  if (password !== confirmPassword) {
+    alert("As senhas não correspondem!")
+    return
   }
 
-  // Badge VIP para todos (visual)
-  badges.push({ name: "Assinante VIP", class: "vip" })
+  const users = JSON.parse(localStorage.getItem("users") || "[]")
 
-  return badges
-}
-
-function updateProfilePage() {
-  const currentUser = getCurrentUser()
-  if (!currentUser) return
-
-  document.getElementById("profileImg").src = currentUser.avatar || generateDefaultAvatar(currentUser.username)
-  document.getElementById("profileUsername").textContent = currentUser.username
-  document.getElementById("profileBio").textContent = currentUser.bio || "Sem bio definida."
-
-  // Banner
-  const profileBanner = document.getElementById("profileBanner")
-  if (currentUser.banner) {
-    profileBanner.style.backgroundImage = `url(${currentUser.banner})`
+  if (users.find((u) => u.username === username)) {
+    alert("Username já existe!")
+    return
   }
 
-  // Data de criação
-  const createdAt = new Date(currentUser.createdAt)
-  const formattedDate = createdAt.toLocaleDateString("pt-BR", {
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  })
-  document.getElementById("profileMemberSince").textContent = `Membro desde: ${formattedDate}`
+  if (users.find((u) => u.email === email)) {
+    alert("Email já cadastrado!")
+    return
+  }
+
+  // Processar foto de perfil
+  if (profilePicInput.files[0]) {
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      const newUser = {
+        username,
+        email,
+        password,
+        bio,
+        profilePic: event.target.result,
+        banner: null,
+      }
+
+      users.push(newUser)
+      localStorage.setItem("users", JSON.stringify(users))
+      localStorage.setItem("currentUser", JSON.stringify(newUser))
+
+      authModal.classList.remove("active")
+      authBtn.textContent = username
+      authBtn.onclick = () => showProfile(newUser)
+      signUpForm.reset()
+    }
+    reader.readAsDataURL(profilePicInput.files[0])
+  } else {
+    const newUser = {
+      username,
+      email,
+      password,
+      bio,
+      profilePic: null,
+      banner: null,
+    }
+
+    users.push(newUser)
+    localStorage.setItem("users", JSON.stringify(users))
+    localStorage.setItem("currentUser", JSON.stringify(newUser))
+
+    authModal.classList.remove("active")
+    authBtn.textContent = username
+    authBtn.onclick = () => showProfile(newUser)
+    signUpForm.reset()
+  }
+})
+
+// Mostrar perfil
+function showProfile(user) {
+  document.getElementById("profileUsername").textContent = user.username
+  document.getElementById("profileBio").textContent = user.bio || "Sem bio definida"
+
+  const avatar = document.getElementById("profileAvatar")
+  if (user.profilePic) {
+    avatar.src = user.profilePic
+  } else {
+    avatar.src =
+      'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="120" height="120"%3E%3Crect fill="%23333" width="120" height="120"/%3E%3Ctext fill="%23fff" x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-size="48"%3E' +
+      user.username.charAt(0).toUpperCase() +
+      "%3C/text%3E%3C/svg%3E"
+  }
+
+  const banner = document.getElementById("profileBanner")
+  if (user.banner) {
+    banner.style.backgroundImage = `url(${user.banner})`
+    banner.style.backgroundSize = "cover"
+    banner.style.backgroundPosition = "center"
+  }
 
   // Badges
   const badgesContainer = document.getElementById("profileBadges")
   badgesContainer.innerHTML = ""
 
-  const badges = getUserBadges(currentUser.username)
-  badges.forEach((badge) => {
-    const badgeEl = document.createElement("span")
-    badgeEl.className = `badge ${badge.class}`
-    badgeEl.textContent = badge.name
-    badgesContainer.appendChild(badgeEl)
-  })
+  // Badges especiais para silva777only
+  if (user.username === "silva777only") {
+    badgesContainer.innerHTML += '<span class="badge developer">👨‍💻 Desenvolvedor</span>'
+    badgesContainer.innerHTML += '<span class="badge owner">👑 Owner</span>'
+  }
+
+  profileModal.classList.add("active")
 }
 
-// ==================== FORMULÁRIO DE CONTATO ====================
-function initContactForm() {
-  const contactForm = document.getElementById("contactForm")
-  const formStatus = document.getElementById("formStatus")
-  const submitBtn = document.getElementById("submitBtn")
+// Fechar perfil
+closeProfile.addEventListener("click", () => {
+  profileModal.classList.remove("active")
+})
 
-  contactForm.addEventListener("submit", async (e) => {
-    e.preventDefault()
+// Logout
+logoutBtn.addEventListener("click", () => {
+  localStorage.removeItem("currentUser")
+  authBtn.textContent = "Sign In / Sign Up"
+  authBtn.onclick = () => authModal.classList.add("active")
+  profileModal.classList.remove("active")
+})
 
-    // Desabilita botão
-    submitBtn.disabled = true
-    submitBtn.innerHTML = "<span>Enviando...</span>"
+// ═══════════════════════════════════════════════════════════════
+// CONFIGURAÇÕES
+// ═══════════════════════════════════════════════════════════════
+const settingsBtn = document.getElementById("settingsBtn")
+const settingsModal = document.getElementById("settingsModal")
+const closeSettings = document.getElementById("closeSettings")
+const saveSettingsBtn = document.getElementById("saveSettingsBtn")
+const profilePicInput = document.getElementById("profilePicInput")
+const bannerInput = document.getElementById("bannerInput")
+const bioInput = document.getElementById("bioInput")
 
-    // Coleta dados
-    const formData = {
-      firstName: document.getElementById("firstName").value,
-      lastName: document.getElementById("lastName").value,
-      email: document.getElementById("email").value,
-      subject: document.getElementById("subject").value,
-      message: document.getElementById("message").value,
-      contactMethod: document.getElementById("contactMethod").value,
-      contactInfo: document.getElementById("contactInfo").value,
-      reason: document.getElementById("reason").value,
-      sector: document.getElementById("sector").value,
+settingsBtn.addEventListener("click", () => {
+  const currentUser = localStorage.getItem("currentUser")
+  if (!currentUser) {
+    alert("Você precisa estar logado para acessar as configurações!")
+    return
+  }
+
+  const user = JSON.parse(currentUser)
+  bioInput.value = user.bio || ""
+  settingsModal.classList.add("active")
+})
+
+closeSettings.addEventListener("click", () => {
+  settingsModal.classList.remove("active")
+})
+
+saveSettingsBtn.addEventListener("click", () => {
+  const currentUser = localStorage.getItem("currentUser")
+  if (!currentUser) return
+
+  const user = JSON.parse(currentUser)
+  const users = JSON.parse(localStorage.getItem("users") || "[]")
+  const userIndex = users.findIndex((u) => u.username === user.username)
+
+  // Atualizar bio
+  user.bio = bioInput.value
+
+  // Processar nova foto de perfil
+  if (profilePicInput.files[0]) {
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      user.profilePic = event.target.result
+      updateUserData(user, users, userIndex)
     }
+    reader.readAsDataURL(profilePicInput.files[0])
+  }
 
-    // Traduz motivo
-    const reasonTranslations = {
-      partnership: "Parceria",
-      support: "Suporte Técnico",
-      bug: "Reportar Bug",
-      suggestion: "Sugestão",
-      dmca: "Remoção de Conteúdo (DMCA)",
-      question: "Dúvida Geral",
-      other: "Outro",
+  // Processar novo banner
+  if (bannerInput.files[0]) {
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      user.banner = event.target.result
+      updateUserData(user, users, userIndex)
     }
+    reader.readAsDataURL(bannerInput.files[0])
+  }
 
-    // Traduz meio de contato
-    const contactMethodTranslations = {
-      email: "Email",
-      phone: "Número de Telefone",
-      discord: "Discord",
-    }
+  // Se não houver arquivos novos, apenas atualizar
+  if (!profilePicInput.files[0] && !bannerInput.files[0]) {
+    updateUserData(user, users, userIndex)
+  }
+})
 
-    // Prepara embed para Discord
-    const embed = {
-      embeds: [
-        {
-          title: "📩 Nova Mensagem de Contato",
-          color: 16777215, // Branco
-          fields: [
-            {
-              name: "👤 Nome Completo",
-              value: `${formData.firstName} ${formData.lastName}`,
-              inline: true,
-            },
-            {
-              name: "📧 Email",
-              value: formData.email,
-              inline: true,
-            },
-            {
-              name: "🏢 Setor",
-              value: formData.sector,
-              inline: true,
-            },
-            {
-              name: "📋 Assunto",
-              value: formData.subject,
-              inline: false,
-            },
-            {
-              name: "🎯 Motivo",
-              value: reasonTranslations[formData.reason] || formData.reason,
-              inline: true,
-            },
-            {
-              name: "📱 Meio de Contato",
-              value: `${contactMethodTranslations[formData.contactMethod]}: ${formData.contactInfo}`,
-              inline: true,
-            },
-            {
-              name: "💬 Mensagem",
-              value: formData.message,
-              inline: false,
-            },
-          ],
-          footer: {
-            text: "EclipseByte Studios - Sistema de Contato",
-          },
-          timestamp: new Date().toISOString(),
-        },
-      ],
-    }
-
-    try {
-      const response = await fetch(
-        "https://discord.com/api/webhooks/1459229422220611584/hOdCqWKLZnGiEsbIJCJw6jQtjrAxZuGBwydgwTQ_PVwx7Ki9vpzKTIDoSkwwVCMGH3co",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(embed),
-        },
-      )
-
-      if (response.ok) {
-        formStatus.className = "form-status success"
-        formStatus.innerHTML = "✅ Mensagem enviada com sucesso! Entraremos em contato em breve."
-        formStatus.classList.remove("hidden")
-        contactForm.reset()
-        showToast("Mensagem enviada com sucesso!", "success")
-      } else {
-        throw new Error("Erro ao enviar")
-      }
-    } catch (error) {
-      formStatus.className = "form-status error"
-      formStatus.innerHTML = "❌ Erro ao enviar mensagem. Por favor, tente novamente."
-      formStatus.classList.remove("hidden")
-      showToast("Erro ao enviar mensagem", "error")
-    }
-
-    // Reabilita botão
-    submitBtn.disabled = false
-    submitBtn.innerHTML = `<span>Enviar Mensagem</span>
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="22" y1="2" x2="11" y2="13"></line>
-                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-            </svg>`
-
-    // Esconde mensagem após 5 segundos
-    setTimeout(() => {
-      formStatus.classList.add("hidden")
-    }, 5000)
-  })
+function updateUserData(user, users, userIndex) {
+  users[userIndex] = user
+  localStorage.setItem("users", JSON.stringify(users))
+  localStorage.setItem("currentUser", JSON.stringify(user))
+  settingsModal.classList.remove("active")
+  alert("Configurações salvas com sucesso!")
 }
 
-// ==================== BOTÕES DE COPIAR ====================
-function initCopyButtons() {
-  const copyButtons = document.querySelectorAll(".copy-btn")
+// ═══════════════════════════════════════════════════════════════
+// NOTIFICAÇÕES
+// ═══════════════════════════════════════════════════════════════
+const notificationsBtn = document.getElementById("notificationsBtn")
+const notificationsPanel = document.getElementById("notificationsPanel")
+const closeNotifications = document.getElementById("closeNotifications")
+const notificationsList = document.getElementById("notificationsList")
 
-  copyButtons.forEach((btn) => {
-    btn.addEventListener("click", async () => {
-      const script = btn.getAttribute("data-script")
+notificationsBtn.addEventListener("click", () => {
+  notificationsPanel.classList.toggle("active")
+})
 
-      try {
-        await navigator.clipboard.writeText(script)
-        btn.classList.add("copied")
-        btn.querySelector("span").textContent = "Copiado!"
-        showToast("Script copiado para a área de transferência!", "success")
+closeNotifications.addEventListener("click", () => {
+  notificationsPanel.classList.remove("active")
+})
 
-        setTimeout(() => {
-          btn.classList.remove("copied")
-          btn.querySelector("span").textContent = "Copiar Script"
-        }, 2000)
-      } catch (error) {
-        showToast("Erro ao copiar script", "error")
-      }
-    })
-  })
-}
-
-// ==================== NOTIFICAÇÕES ====================
-function initNotifications() {
-  const notificationList = document.getElementById("notificationList")
-
-  // Notificações mockadas
+function loadNotifications() {
   const notifications = [
     {
-      title: "Nova atualização do site",
-      message: "Confira as novas funcionalidades!",
-      icon: "🔔",
+      title: "Bem-vindo ao EclipseByte!",
+      message: "Obrigado por visitar nosso site. Explore nossos projetos!",
       time: "Agora",
     },
     {
-      title: "Novo script em breve",
-      message: "Fique ligado para novos lançamentos.",
-      icon: "💀",
-      time: "1h atrás",
+      title: "Novo script disponível",
+      message: "Confira o novo script para Flick na aba EclipseXPloits.",
+      time: "Há 2 horas",
     },
     {
-      title: "Bem-vindo ao Grupo EclipseByte",
-      message: "Obrigado por fazer parte da nossa comunidade!",
-      icon: "🎉",
-      time: "2h atrás",
+      title: "Atualização do site",
+      message: "Implementamos melhorias no sistema de notificações.",
+      time: "Há 1 dia",
     },
   ]
 
-  notificationList.innerHTML = notifications
-    .map(
-      (notif) => `
-        <div class="notification-item">
-            <div class="notification-icon">${notif.icon}</div>
-            <div class="notification-content">
-                <h4>${notif.title}</h4>
-                <p>${notif.message}</p>
-                <span style="font-size: 0.7rem; color: var(--color-gray-600);">${notif.time}</span>
-            </div>
-        </div>
-    `,
-    )
-    .join("")
+  notificationsList.innerHTML = ""
+  notifications.forEach((notif) => {
+    const notifElement = document.createElement("div")
+    notifElement.className = "notification-item"
+    notifElement.innerHTML = `
+            <h4>${notif.title}</h4>
+            <p>${notif.message}</p>
+            <small>${notif.time}</small>
+        `
+    notificationsList.appendChild(notifElement)
+  })
 }
 
-// ==================== TOAST NOTIFICATIONS ====================
-function showToast(message, type = "success") {
-  const container = document.getElementById("toastContainer")
+// ═══════════════════════════════════════════════════════════════
+// FORMULÁRIO DE CONTATO
+// ═══════════════════════════════════════════════════════════════
+const contactForm = document.getElementById("contactForm")
+const formMessage = document.getElementById("formMessage")
 
-  const toast = document.createElement("div")
-  toast.className = `toast ${type}`
-  toast.textContent = message
+contactForm.addEventListener("submit", async (e) => {
+  e.preventDefault()
 
-  container.appendChild(toast)
+  const firstName = document.getElementById("firstName").value
+  const lastName = document.getElementById("lastName").value
+  const email = document.getElementById("email").value
+  const subject = document.getElementById("subject").value
+  const sector = document.getElementById("sector").value
+  const reason = document.getElementById("reason").value
+  const contactMethod = document.getElementById("contactMethod").value
+  const contactInfo = document.getElementById("contactInfo").value
+  const message = document.getElementById("message").value
 
-  setTimeout(() => {
-    toast.remove()
-  }, 3000)
-}
+  const webhookURL =
+    "https://discord.com/api/webhooks/1459229422220611584/hOdCqWKLZnGiEsbIJCJw6jQtjrAxZuGBwydgwTQ_PVwx7Ki9vpzKTIDoSkwwVCMGH3co"
 
-// ==================== ANO ATUAL ====================
-function updateYear() {
-  document.getElementById("currentYear").textContent = new Date().getFullYear()
-}
+  const embed = {
+    embeds: [
+      {
+        title: "📩 Novo Contato Recebido",
+        color: 0xffffff,
+        fields: [
+          { name: "👤 Nome Completo", value: `${firstName} ${lastName}`, inline: false },
+          { name: "📧 Email", value: email, inline: false },
+          { name: "📝 Assunto", value: subject, inline: false },
+          { name: "🏢 Setor", value: sector, inline: true },
+          { name: "📋 Motivo", value: reason, inline: true },
+          { name: "📞 Meio de Contato", value: `${contactMethod}: ${contactInfo}`, inline: false },
+          { name: "💬 Mensagem", value: message, inline: false },
+        ],
+        timestamp: new Date().toISOString(),
+        footer: { text: "EclipseByte Studios - Sistema de Contato" },
+      },
+    ],
+  }
 
-// ==================== TECLAS DE ATALHO ====================
-document.addEventListener("keydown", (e) => {
-  // ESC fecha modais e painéis
-  if (e.key === "Escape") {
-    document.querySelectorAll(".modal-overlay").forEach((m) => m.classList.add("hidden"))
-    closePanels()
+  try {
+    const response = await fetch(webhookURL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(embed),
+    })
+
+    if (response.ok) {
+      formMessage.textContent = "✓ Mensagem enviada com sucesso! Entraremos em contato em breve."
+      formMessage.className = "form-message success"
+      contactForm.reset()
+
+      setTimeout(() => {
+        formMessage.style.display = "none"
+      }, 5000)
+    } else {
+      throw new Error("Erro no envio")
+    }
+  } catch (error) {
+    formMessage.textContent = "✗ Erro ao enviar mensagem. Tente novamente mais tarde."
+    formMessage.className = "form-message error"
+
+    setTimeout(() => {
+      formMessage.style.display = "none"
+    }, 5000)
+  }
+})
+
+// ═══════════════════════════════════════════════════════════════
+// FECHAR MODAIS AO CLICAR FORA
+// ═══════════════════════════════════════════════════════════════
+window.addEventListener("click", (e) => {
+  if (e.target === authModal) {
+    authModal.classList.remove("active")
+  }
+  if (e.target === profileModal) {
+    profileModal.classList.remove("active")
+  }
+  if (e.target === settingsModal) {
+    settingsModal.classList.remove("active")
+  }
+})
+
+// ═══════════════════════════════════════════════════════════════
+// FECHAR PAINEL DE NOTIFICAÇÕES AO CLICAR FORA
+// ═══════════════════════════════════════════════════════════════
+document.addEventListener("click", (e) => {
+  if (
+    !notificationsPanel.contains(e.target) &&
+    !notificationsBtn.contains(e.target) &&
+    notificationsPanel.classList.contains("active")
+  ) {
+    notificationsPanel.classList.remove("active")
   }
 })
